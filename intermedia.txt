@@ -15,7 +15,7 @@
 
                                                             =
 
-                                                                      @posicion
+                                                                      @resultado
 
                                                   IF
 
@@ -31,7 +31,7 @@
 
                                                                       =
 
-                                                                                @posicion
+                                                                                @resultado
 
                                                             IF
 
@@ -43,11 +43,11 @@
 
                                                   ;
 
-                                                                                          1
+                                                                                          0
 
                                                                                 =
 
-                                                                                          @posicion
+                                                                                          @resultado
 
                                                                       IF
 
@@ -59,11 +59,11 @@
 
                                                             ;
 
-                                                                                                              -1
+                                                                                                              Elemento no encontrado
 
                                                                                                     =
 
-                                                                                                              @posicion
+                                                                                                              @resultado
 
                                                                                           CUERPO
 
@@ -71,7 +71,7 @@
 
                                                                                                     =
 
-                                                                                                              @posicion
+                                                                                                              @resultado
 
                                                                                 IF
 

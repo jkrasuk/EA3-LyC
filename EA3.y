@@ -13,6 +13,24 @@ extern int yylineno;
 extern int yyleng;
 extern char *yytext;
 
+typedef struct
+{
+  int indice;
+  int posicion;
+} t_data_list;
+
+typedef struct s_simbolo_list
+{
+  t_data_list data;
+  struct s_simbolo_list *next;
+}t_simbolo_list;
+
+typedef struct
+{
+  t_simbolo_list *primero;
+}t_list;
+t_list listaSimb;
+
 // Seccion TS
 typedef struct
 {
@@ -37,6 +55,10 @@ typedef struct
 {
         t_simbolo *primero;
 }t_tabla;
+int insertarLista(const int cte, const int posicion);
+int obtenerIndiceLista(const int cte);
+char bufferNoEncontrando[10];
+char* puntBufferNoEncontrado;
 int indicePosicion;
 char bufferTS[800];
 char bufferNombrePivot[800];
@@ -44,7 +66,6 @@ char bufferPosicion[800];
 char* puntBufferTs;
 char* puntBufferNombrePivot;
 char* puntBufferPosicion;
-void crearTablaTS();
 int insertarTS(const char*, const char*, const char*, int, double);
 t_data* crearDatos(const char*, const char*, const char*, int, double);
 void guardarTS();
@@ -152,7 +173,12 @@ asig: ID ASIG posicion {
   ;
 
 posicion: POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} lista CC PARC {printf("\n Regla 6 - posicion: POSICION PARA ID PYC CA lista CC PARC \n");}
-  | POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} CC PARC {printf("\n Regla 6 - posicion: POSICION PARA ID PYC CA CC PARC \n");}
+  | POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} CC PARC {
+    sprintf(bufferNoEncontrando,"%s", "Lista vacia");
+    puntBufferNoEncontrado = strtok(bufferNoEncontrando,";\n");
+    _condPosicion = newNode("=", newLeaf("@resultado") , newLeaf( puntBufferNoEncontrado ));
+    _posicion = newNode(";", _posicion , _condPosicion );
+    printf("\n Regla 6 - posicion: POSICION PARA ID PYC CA CC PARC \n");}
   ;
 
 lista: CTE_INT {
@@ -163,15 +189,16 @@ lista: CTE_INT {
                 puntBufferPosicion = strtok(bufferPosicion,";\n");
                 char bufferNoEncontrando[10];
                 char* puntBufferNoEncontrado;
-                sprintf(bufferPosicion,"%d", indicePosicion);
+                                        int numero = atoi(bufferTS);
+                sprintf(bufferPosicion,"%d", insertarLista(numero, indicePosicion));
                 puntBufferPosicion = strtok(bufferPosicion,";\n");
-                sprintf(bufferNoEncontrando,"%d", -1);
+                sprintf(bufferNoEncontrando,"%s", "Elemento no encontrado");
                 puntBufferNoEncontrado = strtok(bufferNoEncontrando,";\n");
                 _condPosicion = newNode( "IF",
                  newNode("=", newLeaf(puntBufferNombrePivot) , newLeaf( puntBufferTs ) ) ,
                   newNode("CUERPO", 
-                            newNode("=", newLeaf("@posicion") , newLeaf( puntBufferPosicion )),
-                            newNode("=", newLeaf("@posicion") , newLeaf( puntBufferNoEncontrado ) )));
+                            newNode("=", newLeaf("@resultado") , newLeaf( puntBufferPosicion )),
+                            newNode("=", newLeaf("@resultado") , newLeaf( puntBufferNoEncontrado ) )));
                 _posicion = newNode(";", _posicion , _condPosicion );
                 printf("\n Regla 8 - lista: CTE_INT \n");
                 }
@@ -179,9 +206,10 @@ lista: CTE_INT {
                         indicePosicion++;
                         sprintf(bufferTS,"%d", $3);
                         puntBufferTs = strtok(bufferTS,";\n");
-                        sprintf(bufferPosicion,"%d", indicePosicion);
+                        int numero = atoi(bufferTS);
+                        sprintf(bufferPosicion,"%d", insertarLista(numero, indicePosicion));
                         puntBufferPosicion = strtok(bufferPosicion,";\n");
-                        _condPosicion = newNode( "IF", newNode("=", newLeaf(puntBufferNombrePivot) , newLeaf( puntBufferTs ) ) , newNode("=", newLeaf("@posicion") , newLeaf( puntBufferPosicion ) ));
+                        _condPosicion = newNode( "IF", newNode("=", newLeaf(puntBufferNombrePivot) , newLeaf( puntBufferTs ) ) , newNode("=", newLeaf("@resultado") , newLeaf( puntBufferPosicion ) ));
                         _posicion = newNode(";", _posicion , _condPosicion );
                         printf("\n Regla 9 - lista: lista COMA CTE_INT \n");
                         }
@@ -221,6 +249,59 @@ void yyerror(const char *str) {
     fprintf(stderr, "Error: %s en la linea %d\n", str, yylineno);
     system("Pause");
     exit(1);
+}
+
+int insertarLista(const int cte, const int posicion)
+{
+    t_simbolo_list *tabla = listaSimb.primero;
+
+    while(tabla)
+    {
+      printf("\n\n comparo %d con %d", tabla->data.indice, cte);
+        if(tabla->data.indice == cte)
+        {
+                printf("\n\n Devuelvo %d", tabla->data.indice, cte);
+            return tabla->data.posicion;
+        }
+               
+        if(tabla->next == NULL)
+        {
+            break;
+        }
+
+        tabla = tabla->next;
+    }
+    
+    t_data_list *data = (t_data_list*) malloc(sizeof(t_data_list));
+
+    data->indice = cte;
+    data->posicion = posicion;
+    
+    if(data == NULL)
+    {
+        return -1;
+    }
+
+    t_simbolo_list* nuevo = (t_simbolo_list*) malloc(sizeof(t_simbolo_list));
+
+    if(nuevo == NULL)
+    {
+        return -2;
+    }
+
+    nuevo->data = *data;
+    nuevo->next = NULL;
+
+    if(listaSimb.primero == NULL)
+    {
+        listaSimb.primero = nuevo;
+    }
+    else
+    {
+        tabla->next = nuevo;
+    }
+
+    return posicion;
 }
 // Seccion de codigo para TS
 int insertarTS(const char *nombre, const char *tipo, const char* valString, int valInt, double valDouble)
