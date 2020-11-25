@@ -1,0 +1,102 @@
+digraph G {
+	node [fontname = "Arial"];
+ N49 -> N46; 
+ N46 -> N43; 
+ N43 -> N4; 
+ N4 -> N1; 
+ N1 -> N0; 
+ N0 [label = "Ingrese un valor pivot mayor o igual a 1: "]
+ N1 [label = "WRITE"]
+ N4 -> N3; 
+ N3 -> N2; 
+ N2 [label = "pivot"]
+ N3 [label = "READ"]
+ N4 [label = ";"]
+ N43 -> N42; 
+ N42 -> N41; 
+ N41 [label = "resul"]
+ N42 -> N40; 
+ N40 -> N32; 
+ N32 -> N24; 
+ N24 -> N16; 
+ N16 -> N15; 
+ N15 -> N14; 
+ N14 -> N13; 
+ N13 [label = "pivot"]
+ N14 -> N12; 
+ N12 [label = "2"]
+ N14 [label = "="]
+ N15 -> N11; 
+ N11 -> N10; 
+ N10 -> N9; 
+ N9 [label = "@posicion"]
+ N10 -> N8; 
+ N8 [label = "0"]
+ N10 [label = "="]
+ N11 -> N7; 
+ N7 -> N6; 
+ N6 [label = "@posicion"]
+ N7 -> N5; 
+ N5 [label = "-1"]
+ N7 [label = "="]
+ N11 [label = "CUERPO"]
+ N15 [label = "IF"]
+ N16 [label = ";"]
+ N24 -> N23; 
+ N23 -> N22; 
+ N22 -> N21; 
+ N21 [label = "pivot"]
+ N22 -> N20; 
+ N20 [label = "2"]
+ N22 [label = "="]
+ N23 -> N19; 
+ N19 -> N18; 
+ N18 [label = "@posicion"]
+ N19 -> N17; 
+ N17 [label = "1"]
+ N19 [label = "="]
+ N23 [label = "IF"]
+ N24 [label = ";"]
+ N32 -> N31; 
+ N31 -> N30; 
+ N30 -> N29; 
+ N29 [label = "pivot"]
+ N30 -> N28; 
+ N28 [label = "1"]
+ N30 [label = "="]
+ N31 -> N27; 
+ N27 -> N26; 
+ N26 [label = "@posicion"]
+ N27 -> N25; 
+ N25 [label = "2"]
+ N27 [label = "="]
+ N31 [label = "IF"]
+ N32 [label = ";"]
+ N40 -> N39; 
+ N39 -> N38; 
+ N38 -> N37; 
+ N37 [label = "pivot"]
+ N38 -> N36; 
+ N36 [label = "4"]
+ N38 [label = "="]
+ N39 -> N35; 
+ N35 -> N34; 
+ N34 [label = "@posicion"]
+ N35 -> N33; 
+ N33 [label = "3"]
+ N35 [label = "="]
+ N39 [label = "IF"]
+ N40 [label = ";"]
+ N42 [label = "="]
+ N43 [label = ";"]
+ N46 -> N45; 
+ N45 -> N44; 
+ N44 [label = "Elemento encontrado en posicion: "]
+ N45 [label = "WRITE"]
+ N46 [label = ";"]
+ N49 -> N48; 
+ N48 -> N47; 
+ N47 [label = "resul"]
+ N48 [label = "WRITE"]
+ N49 [label = ";"]
+}

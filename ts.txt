@@ -1,0 +1,5 @@
+NOMBRE                                                      TIPO DATO           VALOR                                             LONGITUD       
+_Ingrese_un_valor_pivot_mayor_o_igual_a_1____1              CONST_STR           "Ingrese un valor pivot mayor o igual a 1: "      42             
+pivot                                                       INT                 -                                                 -              
+resul                                                       INT                 -                                                 -              
+_Elemento_encontrado_en_posicion____2                       CONST_STR           "Elemento encontrado en posicion: "               33             

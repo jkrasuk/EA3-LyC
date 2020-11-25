@@ -1,0 +1,100 @@
+
+                    resul
+
+          WRITE
+
+;
+
+                              "Elemento encontrado en posicion: "
+
+                    WRITE
+
+          ;
+
+                                                                      3
+
+                                                            =
+
+                                                                      @posicion
+
+                                                  IF
+
+                                                                      4
+
+                                                            =
+
+                                                                      pivot
+
+                                        ;
+
+                                                                                2
+
+                                                                      =
+
+                                                                                @posicion
+
+                                                            IF
+
+                                                                                1
+
+                                                                      =
+
+                                                                                pivot
+
+                                                  ;
+
+                                                                                          1
+
+                                                                                =
+
+                                                                                          @posicion
+
+                                                                      IF
+
+                                                                                          2
+
+                                                                                =
+
+                                                                                          pivot
+
+                                                            ;
+
+                                                                                                              -1
+
+                                                                                                    =
+
+                                                                                                              @posicion
+
+                                                                                          CUERPO
+
+                                                                                                              0
+
+                                                                                                    =
+
+                                                                                                              @posicion
+
+                                                                                IF
+
+                                                                                                    2
+
+                                                                                          =
+
+                                                                                                    pivot
+
+                                                                      ;
+
+                              =
+
+                                        resul
+
+                    ;
+
+                                                  pivot
+
+                                        READ
+
+                              ;
+
+                                                  "Ingrese un valor pivot mayor o igual a 1: "
+
+                                        WRITE
