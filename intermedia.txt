@@ -59,19 +59,11 @@
 
                                                             ;
 
-                                                                                                              Elemento no encontrado
+                                                                                                    0
 
-                                                                                                    =
+                                                                                          =
 
-                                                                                                              @resultado
-
-                                                                                          CUERPO
-
-                                                                                                              0
-
-                                                                                                    =
-
-                                                                                                              @resultado
+                                                                                                    @resultado
 
                                                                                 IF
 
@@ -82,6 +74,12 @@
                                                                                                     pivot
 
                                                                       ;
+
+                                                                                          Elemento no encontrado
+
+                                                                                =
+
+                                                                                          @resultado
 
                               =
 

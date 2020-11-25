@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h> 
+#include <stdbool.h>
 #define YYDEBUG 0
 
 extern int yylex();
@@ -59,6 +60,8 @@ int insertarLista(const int cte, const int posicion);
 int obtenerIndiceLista(const int cte);
 char bufferNoEncontrando[10];
 char* puntBufferNoEncontrado;
+void crearTablaTS();
+char* limpiarString(char*, const char*);
 int indicePosicion;
 char bufferTS[800];
 char bufferNombrePivot[800];
@@ -81,6 +84,12 @@ typedef struct treeNode {
     struct treeNode* left;
     struct treeNode* right;
 } ast;
+
+void    generarAssemblerAsignacion( ast * root , FILE *archAssembler);
+void    generarAssemblerAsignacionSimple( ast * root , FILE *archAssembler);
+
+int branchN = 0;
+bool esValor(const char *);
 
 int  i=0, contadorString = 0, contadorId = 0;
 ast * _write, * _read, *_asig, * _posicion, *_fact, *_condPosicion;
@@ -196,10 +205,11 @@ lista: CTE_INT {
                 puntBufferNoEncontrado = strtok(bufferNoEncontrando,";\n");
                 _condPosicion = newNode( "IF",
                  newNode("=", newLeaf(puntBufferNombrePivot) , newLeaf( puntBufferTs ) ) ,
-                  newNode("CUERPO", 
-                            newNode("=", newLeaf("@resultado") , newLeaf( puntBufferPosicion )),
-                            newNode("=", newLeaf("@resultado") , newLeaf( puntBufferNoEncontrado ) )));
-                _posicion = newNode(";", _posicion , _condPosicion );
+                            newNode("=", newLeaf("@resultado") , newLeaf( puntBufferPosicion )));
+                insertarTS(puntBufferNoEncontrado, "CONST_STR", puntBufferNoEncontrado, 0, 0);
+                                        insertarTS(puntBufferTs, "CONST_INT", "", insertarLista(numero, indicePosicion), 0);
+                _posicion = newNode(";", newNode("=", newLeaf("@resultado") , newLeaf( puntBufferNoEncontrado )), _condPosicion);
+                insertarTS(puntBufferTs, "CONST_INT", "", numero, 0);
                 printf("\n Regla 8 - lista: CTE_INT \n");
                 }
   | lista COMA CTE_INT {
@@ -210,7 +220,9 @@ lista: CTE_INT {
                         sprintf(bufferPosicion,"%d", insertarLista(numero, indicePosicion));
                         puntBufferPosicion = strtok(bufferPosicion,";\n");
                         _condPosicion = newNode( "IF", newNode("=", newLeaf(puntBufferNombrePivot) , newLeaf( puntBufferTs ) ) , newNode("=", newLeaf("@resultado") , newLeaf( puntBufferPosicion ) ));
+                        insertarTS(puntBufferTs, "CONST_INT", "", insertarLista(numero, indicePosicion), 0);
                         _posicion = newNode(";", _posicion , _condPosicion );
+                        insertarTS(puntBufferTs, "CONST_INT", "", numero, 0);
                         printf("\n Regla 9 - lista: lista COMA CTE_INT \n");
                         }
   ;
@@ -237,6 +249,7 @@ int main(int argc, char *argv[]) {
     if ((yyin = fopen(argv[1], "rt")) == NULL) {
         printf("\nNo se puede abrir el archivo: %s\n", argv[1]);
     } else {
+      crearTablaTS();
         yyparse();
     }
 
@@ -302,6 +315,28 @@ int insertarLista(const int cte, const int posicion)
     }
 
     return posicion;
+}
+
+void crearTablaTS()
+{
+    t_data *data = (t_data*)malloc(sizeof(t_data));
+    data = crearDatos("@resultado", "INT", "", 0, 0);
+
+    if(data == NULL)
+    {
+        return;
+    }
+
+    t_simbolo* nuevo = (t_simbolo*)malloc(sizeof(t_simbolo));
+
+    if(nuevo == NULL)
+    {
+        return;
+    }
+
+    nuevo->data = *data;
+    nuevo->next = NULL;
+    tablaTS.primero = nuevo;
 }
 // Seccion de codigo para TS
 int insertarTS(const char *nombre, const char *tipo, const char* valString, int valInt, double valDouble)
@@ -584,10 +619,10 @@ void generarAssembler()
         exit(1);
     }
     generaHeader(file);
-    // crearSeccionData(file);
-    // crearSeccionCode(file);
-    // recorrerArbol( _pProg ,file );
-    // crearFooter(file);
+    crearSeccionData(file);
+    crearSeccionCode(file);
+    recorrerArbol( _pProg ,file );
+    generaFooter(file);
     fclose(file);
 }
 void generaHeader(FILE *f)
@@ -600,11 +635,211 @@ void generaHeader(FILE *f)
     fprintf(f, ".STACK 200h\n");
     fprintf(f, "\n");
 }
-void generaFooter(FILE *f)
+void crearSeccionData(FILE *archAssembler){
+    t_simbolo *aux;
+    t_simbolo *tablaSimbolos = tablaTS.primero;
+
+    fprintf(archAssembler, "%s\n\n", ".DATA");
+
+    //char linea[100];
+    while(tablaSimbolos){
+        aux = tablaSimbolos;
+        tablaSimbolos = tablaSimbolos->next;
+        if(strcmp(aux->data.tipo, "INT") == 0){
+            //sprintf(linea, "%-35s%-30s%-30s%-d\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
+            fprintf(archAssembler, "%-15s%-15s%-15s\n", aux->data.nombre, "dd", "?");
+        }
+        else if(strcmp(aux->data.tipo, "FLOAT") == 0){
+            fprintf(archAssembler, "%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", "?");
+        }
+        else if(strcmp(aux->data.tipo, "STRING") == 0){ 
+            fprintf(archAssembler, "%-15s%-15s%-15s\n", aux->data.nombreASM, "db", "?");
+        }
+        else if(strcmp(aux->data.tipo, "CONST_INT") == 0){ 
+            char valor[50];
+            sprintf(valor, "%d.0", aux->data.valor.valor_int);
+            fprintf(archAssembler, "%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", valor);
+        }
+        else if(strcmp(aux->data.tipo, "CONST_REAL") == 0){ 
+            char valor[50];
+            sprintf(valor, "%g", aux->data.valor.valor_double);
+            fprintf(archAssembler, "%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", valor);
+        }
+        else if(strcmp(aux->data.tipo, "CONST_STR") == 0){
+            char valor[200];
+            sprintf(valor, "%s, '$', %d dup (?)",aux->data.valor.valor_str, strlen(aux->data.valor.valor_str) - 2);
+            fprintf(archAssembler, "%-60s%-15s%-15s\n", aux->data.nombreASM, "db", valor);
+        }
+        //fprintf(archAssembler, "%s", linea);
+        //free(aux);
+    }
+    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@ifI", "dd", "?", "; Variable para condición izquierda");
+    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@ifD", "dd", "?", "; Variable para condición derecha");
+}
+void crearSeccionCode(FILE *archAssembler){
+    fprintf(archAssembler, "\n%s\n\n%s\n\n", ".CODE", "inicio:");
+    fprintf(archAssembler, "%-30s%-30s\n", "mov AX,@DATA", "; Inicializa el segmento de datos");
+    fprintf(archAssembler, "%-30s\n%-30s\n\n", "mov DS,AX", "mov ES,AX");
+}
+void generaFooter(FILE *archAssembler)
 {
-    fprintf(f, "\n\n");
-    fprintf(f, "MOV EAX, 4C00h\n");
-    fprintf(f, "INT 21h\n\n");
-    fprintf(f, "\n");
+    fprintf(archAssembler, "\n%-30s%-30s\n", "mov AX,4C00h", "; Indica que debe finalizar la ejecución");
+    fprintf(archAssembler, "%s\n\n%s", "int 21h", "END inicio");
+}
+void recorrerArbol( ast * root , FILE *archAssembler)
+{
+    bool fueAsignacion = false;
+    //printf( "%s\t", root->value);
+
+    if ( root->left != NULL ) {
+        recorrerArbol(root->left, archAssembler);
+    }
+
+    if ( (strcmp(root->value,";") == 0 ) ) {
+        //aca no pasa nada
+    }else if ( strcmp(root->value,"WRITE") == 0 ) {
+        t_simbolo *lexema = getLexema( root->right->value );
+        if( strcmp(lexema->data.tipo, "CONST_STR") == 0 )
+        {
+            fprintf(archAssembler, "displayString %s\nNEWLINE\n", lexema->data.nombreASM);
+        }
+        else{
+            fprintf(archAssembler, "DisplayFloat %s,1\nNEWLINE\n", lexema->data.nombreASM);
+        }
+    }else if ( strcmp(root->value,"READ") == 0 )
+    {
+        t_simbolo *lexema = getLexema( root->right->value );
+        fprintf(archAssembler, "GetFloat %s\nNEWLINE\n", lexema->data.nombreASM); //directamente levanto un float porque sino rompe la division
+    }else if ( strcmp(root->value,"=") == 0 )
+    {
+        fueAsignacion = true;
+
+        if (strcmp(root->right->value,";") == 0) {
+            generarAssemblerAsignacion(root->right, archAssembler );
+            t_simbolo *lexema = getLexema( root->left->value );
+            fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM );
+        }
+
+
+        // if (strcmp(root->right->value,"=") == 0 ) 
+        // {
+        //     //cuando el maximo contiene un solo elemento es mas facil poner el codigo aca que llamar a las otras funciones.
+        //     t_simbolo *lexema = getLexema( root->right->right->value );
+        //     fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM); //cargo el lado derecho 
+        //     lexema = getLexema( root->left->value );
+        //     fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM ); //lo guardo en la variable del lado izquierdo
+        // } else if (strcmp(root->right->value,";") == 0) {
+        //     generarAssemblerAsignacion(root->right, archAssembler );
+        //     t_simbolo *lexema = getLexema( root->left->value );
+        //     fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM );
+        // } else {
+        //     generarAssemblerAsignacionSimple(root, archAssembler );
+        // }
+    }
+
+
+
+    if( (root->right != NULL) && !(fueAsignacion) ) {
+        recorrerArbol(root->right, archAssembler);
+    }
+}
+void    generarAssemblerAsignacionSimple( ast * root , FILE *archAssembler )
+{
+        t_simbolo *lexema = getLexema( root->right->value );
+        fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM); //cargo el lado derecho
+        lexema = getLexema( root->left->value );
+        fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM ); //lo guardo en la variable del lado izquierdo
+}
+
+
+void    generarAssemblerMax( ast * root , FILE *archAssembler)
+    {
+        
+        if ( strcmp(root->value,"=") == 0 )
+        {
+            
+            fprintf(archAssembler, "\n;Comienza el codigo de maximo\n");
+            generarAssemblerAsignacionSimple( root, archAssembler);
+        }else{
+            
+            if( root->left != NULL ) {
+                generarAssemblerMax( root->left , archAssembler);
+            }
+            if( strcmp(root->value,"IF") == 0  )
+            {
+                fprintf(archAssembler, "\n;Codigo if\n");
+                // printf("izq izq es %s", root->left->left->value  );
+                t_simbolo *lexemaI = getLexema( root->left->left->value );
+                fprintf(archAssembler, "fld %s\n", lexemaI->data.nombreASM);
+                fprintf(archAssembler, "fstp @ifI\n");
+                // printf("izq der es %s", root->left->right->value  );
+                t_simbolo *lexemaD = getLexema( root->left->right->value );
+                fprintf(archAssembler, "fld %s\n", lexemaD->data.nombreASM);
+                fprintf(archAssembler, "fstp @ifD\n");
+                fprintf(archAssembler, "fld @ifI\n");       //carga @ifI
+                fprintf(archAssembler, "fld @ifD\n");       //carga @ifD
+                fprintf(archAssembler, "fxch\n");           //intercambia las posiciones 0 y 1
+                fprintf(archAssembler, "fcom \n");          //compara 
+                fprintf(archAssembler, "fstsw AX\nsahf\n"); //no se si porque sentencia es necesaria
+                fprintf(archAssembler, "jae branch%d\n", branchN );// si dio false, salteate lo siguiente
+                generarAssemblerAsignacionSimple( root->right, archAssembler); //como se que siempre va ser una asignacion ya le llamo esto
+                fprintf(archAssembler, "branch%d:\n", branchN ); //aca cae si dio false
+                branchN++;                                  //sumo el numero de branch
+
+            }else if ( root->right != NULL ) {
+                generarAssemblerMax( root->right , archAssembler);
+            }
+
+        }
+    }
+void    generarAssemblerAsignacion( ast * root , FILE *archAssembler)
+{
+  generarAssemblerMax(root, archAssembler );
+  fprintf(archAssembler, "fld @resultado\n");           
+}
+t_simbolo * getLexema(const char *valor){
+    t_simbolo *lexema;
+    t_simbolo *tablaSimbolos = tablaTS.primero;
+
+    char nombreLimpio[32];
+    limpiarString(nombreLimpio, valor);
+    char nombreCTE[32] = "_";
+    strcat(nombreCTE, nombreLimpio);
+    int esID, esCTE, esASM, esValor =-1;
+    char valorFloat[32];
+    while(tablaSimbolos){
+        printf("tengo %s y busco %s\n", valor, tablaSimbolos->data.nombreASM);
+        esID = strcmp(tablaSimbolos->data.nombre, nombreLimpio);
+        esCTE = strcmp(tablaSimbolos->data.nombre, nombreCTE);
+        esASM = strcmp(tablaSimbolos->data.nombreASM, valor);
+        if(strcmp(tablaSimbolos->data.tipo, "CONST_STR") == 0)
+        {
+            esValor = strcmp(valor, tablaSimbolos->data.valor.valor_str);
+        }
+        if(esID == 0 || esCTE == 0 || esASM == 0 || esValor == 0)
+        { 
+            lexema = tablaSimbolos;
+            printf("\nRetorno!\n");
+            return lexema;
+        }
+        tablaSimbolos = tablaSimbolos->next;
+    }
+    printf( "Hubo un error en la declaracion de datos, falto declarar %s" ,nombreLimpio );
+    return NULL;
+}
+char* limpiarString(char* dest, const char* cad)
+{
+    int i, longitud, j=0;
+    longitud = strlen(cad);
+    for(i=0; i<longitud; i++)
+    {
+        if(cad[i] != '"')
+        {
+            dest[j] = cad[i];
+            j++;
+        }
+    }
+    dest[j] = '\0';
+    return dest;
 }
 // FIN Seccion de codigo para Assembler
