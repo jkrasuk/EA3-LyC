@@ -11,15 +11,14 @@ include number.asm
 @resultado     dd             ?              
 _Ingrese_un_valor_pivot_mayor_o_igual_a_1____1              db             "Ingrese un valor pivot mayor o igual a 1: ", '$', 42 dup (?)
 pivot          dd             ?              
-Elemento_no_encontrado_2                                    db             Elemento no encontrado, '$', 20 dup (?)
+_9999          dd             9999.0         
 _0             dd             0.0            
-_2             dd             2.0            
 _2             dd             2.0            
 _1             dd             1.0            
 _3             dd             3.0            
 _4             dd             4.0            
 resul          dd             ?              
-_Elemento_encontrado_en_posicion____3                       db             "Elemento encontrado en posicion: ", '$', 33 dup (?)
+_Elemento_encontrado_en_posicion____2                       db             "Elemento encontrado en posicion: ", '$', 33 dup (?)
 @ifI           dd             ?              ; Variable para condición izquierda
 @ifD           dd             ?              ; Variable para condición derecha
 
@@ -37,7 +36,7 @@ GetFloat pivot
 NEWLINE
 
 ;Comienza el codigo de maximo
-fld Elemento_no_encontrado_2
+fld _9999
 fstp @resultado
 
 ;Comienza el codigo de maximo
@@ -121,7 +120,7 @@ fstp @resultado
 branch3:
 fld @resultado
 fstp resul
-displayString _Elemento_encontrado_en_posicion____3
+displayString _Elemento_encontrado_en_posicion____2
 NEWLINE
 DisplayFloat resul,1
 NEWLINE

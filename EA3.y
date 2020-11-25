@@ -201,12 +201,12 @@ lista: CTE_INT {
                                         int numero = atoi(bufferTS);
                 sprintf(bufferPosicion,"%d", insertarLista(numero, indicePosicion));
                 puntBufferPosicion = strtok(bufferPosicion,";\n");
-                sprintf(bufferNoEncontrando,"%s", "Elemento no encontrado");
+                sprintf(bufferNoEncontrando,"%d", 9999);
                 puntBufferNoEncontrado = strtok(bufferNoEncontrando,";\n");
                 _condPosicion = newNode( "IF",
                  newNode("=", newLeaf(puntBufferNombrePivot) , newLeaf( puntBufferTs ) ) ,
                             newNode("=", newLeaf("@resultado") , newLeaf( puntBufferPosicion )));
-                insertarTS(puntBufferNoEncontrado, "CONST_STR", puntBufferNoEncontrado, 0, 0);
+                insertarTS(puntBufferNoEncontrado, "CONST_INT", "", 9999, 0);
                                         insertarTS(puntBufferTs, "CONST_INT", "", insertarLista(numero, indicePosicion), 0);
                 _posicion = newNode(";", newNode("=", newLeaf("@resultado") , newLeaf( puntBufferNoEncontrado )), _condPosicion);
                 insertarTS(puntBufferTs, "CONST_INT", "", numero, 0);
@@ -270,10 +270,8 @@ int insertarLista(const int cte, const int posicion)
 
     while(tabla)
     {
-      printf("\n\n comparo %d con %d", tabla->data.indice, cte);
         if(tabla->data.indice == cte)
         {
-                printf("\n\n Devuelvo %d", tabla->data.indice, cte);
             return tabla->data.posicion;
         }
                
@@ -358,7 +356,17 @@ int insertarTS(const char *nombre, const char *tipo, const char* valString, int 
             {
                 return 1;
             }
-        }
+      } else if(strcmp(tabla->data.tipo, "CONST_INT") == 0 && strcmp(tipo, "CONST_INT") == 0 )
+        {
+                                      printf("\n Tengo %s", nombre);
+
+                            printf("\n Tengo %d y %d", tabla->data.valor.valor_int,valInt);
+if(tabla->data.valor.valor_int == valInt){
+  return 1;
+}
+                printf("\n Voy a crear %d", valInt);
+
+      }
         
         if(tabla->next == NULL)
         {
@@ -366,7 +374,7 @@ int insertarTS(const char *nombre, const char *tipo, const char* valString, int 
         }
         tabla = tabla->next;
     }
-    
+    printf("\n Voy a crear %d", valInt);
     t_data *data = (t_data*) malloc(sizeof(t_data));
     data = crearDatos(nombre, tipo, valString, valInt, valDouble);
 
@@ -808,7 +816,6 @@ t_simbolo * getLexema(const char *valor){
     int esID, esCTE, esASM, esValor =-1;
     char valorFloat[32];
     while(tablaSimbolos){
-        printf("tengo %s y busco %s\n", valor, tablaSimbolos->data.nombreASM);
         esID = strcmp(tablaSimbolos->data.nombre, nombreLimpio);
         esCTE = strcmp(tablaSimbolos->data.nombre, nombreCTE);
         esASM = strcmp(tablaSimbolos->data.nombreASM, valor);
@@ -819,7 +826,6 @@ t_simbolo * getLexema(const char *valor){
         if(esID == 0 || esCTE == 0 || esASM == 0 || esValor == 0)
         { 
             lexema = tablaSimbolos;
-            printf("\nRetorno!\n");
             return lexema;
         }
         tablaSimbolos = tablaSimbolos->next;
