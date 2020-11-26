@@ -54,7 +54,7 @@ fxch
 fcom 
 fstsw AX
 sahf
-jae branch0
+jne branch0
 fld _0
 fstp @resultado
 branch0:
@@ -74,7 +74,7 @@ fxch
 fcom 
 fstsw AX
 sahf
-jae branch1
+jne branch1
 fld _0
 fstp @resultado
 branch1:
@@ -94,7 +94,7 @@ fxch
 fcom 
 fstsw AX
 sahf
-jae branch2
+jne branch2
 fld _2
 fstp @resultado
 branch2:
@@ -114,7 +114,7 @@ fxch
 fcom 
 fstsw AX
 sahf
-jae branch3
+jne branch3
 fld _3
 fstp @resultado
 branch3:

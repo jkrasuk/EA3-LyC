@@ -721,28 +721,20 @@ void recorrerArbol( ast * root , FILE *archAssembler)
     }else if ( strcmp(root->value,"=") == 0 )
     {
         fueAsignacion = true;
-
-        if (strcmp(root->right->value,";") == 0) {
+        if (strcmp(root->right->value,"=") == 0 ) 
+        {
+            //cuando el maximo contiene un solo elemento es mas facil poner el codigo aca que llamar a las otras funciones.
+            t_simbolo *lexema = getLexema( root->right->right->value );
+            fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM); //cargo el lado derecho 
+            lexema = getLexema( root->left->value );
+            fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM ); //lo guardo en la variable del lado izquierdo
+        } else if (strcmp(root->right->value,";") == 0) {
             generarAssemblerAsignacion(root->right, archAssembler );
             t_simbolo *lexema = getLexema( root->left->value );
             fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM );
+        } else {
+            generarAssemblerAsignacionSimple(root, archAssembler );
         }
-
-
-        // if (strcmp(root->right->value,"=") == 0 ) 
-        // {
-        //     //cuando el maximo contiene un solo elemento es mas facil poner el codigo aca que llamar a las otras funciones.
-        //     t_simbolo *lexema = getLexema( root->right->right->value );
-        //     fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM); //cargo el lado derecho 
-        //     lexema = getLexema( root->left->value );
-        //     fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM ); //lo guardo en la variable del lado izquierdo
-        // } else if (strcmp(root->right->value,";") == 0) {
-        //     generarAssemblerAsignacion(root->right, archAssembler );
-        //     t_simbolo *lexema = getLexema( root->left->value );
-        //     fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM );
-        // } else {
-        //     generarAssemblerAsignacionSimple(root, archAssembler );
-        // }
     }
 
 
@@ -789,7 +781,7 @@ void    generarAssemblerMax( ast * root , FILE *archAssembler)
                 fprintf(archAssembler, "fxch\n");           //intercambia las posiciones 0 y 1
                 fprintf(archAssembler, "fcom \n");          //compara 
                 fprintf(archAssembler, "fstsw AX\nsahf\n"); //no se si porque sentencia es necesaria
-                fprintf(archAssembler, "jae branch%d\n", branchN );// si dio false, salteate lo siguiente
+                fprintf(archAssembler, "jne branch%d\n", branchN );// si dio false, salteate lo siguiente
                 generarAssemblerAsignacionSimple( root->right, archAssembler); //como se que siempre va ser una asignacion ya le llamo esto
                 fprintf(archAssembler, "branch%d:\n", branchN ); //aca cae si dio false
                 branchN++;                                  //sumo el numero de branch
@@ -800,7 +792,7 @@ void    generarAssemblerMax( ast * root , FILE *archAssembler)
 
         }
     }
-void    generarAssemblerAsignacion( ast * root , FILE *archAssembler)
+void generarAssemblerAsignacion( ast * root , FILE *archAssembler)
 {
   generarAssemblerMax(root, archAssembler );
   fprintf(archAssembler, "fld @resultado\n");           
