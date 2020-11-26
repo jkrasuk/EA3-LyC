@@ -92,6 +92,8 @@ int branchN = 0;
 int contadorConstantes = 0;
 int branchFinalizoSinResultados = 9999;
 int branchListaVacia = 10000;
+char bufferNoEncontrando[10];
+char* puntBufferNoEncontrado;
 bool esValor(const char *);
 
 int  i=0, contadorString = 0, contadorId = 0;
@@ -140,9 +142,8 @@ void recorrerArbol( ast * , FILE *);
 %%
 
 s: 
-  {printf("Inicia COMPILADOR\n");
-                  insertarTS("_elemento_no_encontrado", "CONST_STR", "\"Elemento no encontrado\"", 0, 0);
-                  insertarTS("_lista_vacia", "CONST_STR", "\"Lista vacia\"", 0, 0);
+  {
+    printf("Inicia COMPILADOR\n");
 }
   prog {
         printf("\n Regla 0 - s: PROG \n");
@@ -187,53 +188,71 @@ asig: ID ASIG posicion {
                           }
   ;
 
-posicion: POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} lista CC PARC {printf("\n Regla 6 - posicion: POSICION PARA ID PYC CA lista CC PARC \n");}
+posicion: 
+  POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} lista CC PARC {printf("\n Regla 6 - posicion: POSICION PARA ID PYC CA lista CC PARC \n");}
   | POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} CC PARC {
-    insertarTS("_0", "CONST_INT", "", 0, 0);
-
+    // Agrego una hoja con el 0
     _posicion = newLeaf("_0");
+
     printf("\n Regla 6 - posicion: POSICION PARA ID PYC CA CC PARC \n");}
   ;
 
 lista: CTE_INT {
-                insertarTS("_1", "CONST_INT", "", 1, 0);
-                insertarTS("_0", "CONST_INT", "", 0, 0);
-
+                // Inicializo la posicion en 0
                 indicePosicion = 0;
-                sprintf(bufferTS,"%d", $1);
-                puntBufferTs = strtok(bufferTS,";\n");
                 sprintf(bufferPosicion,"%d", indicePosicion);
                 puntBufferPosicion = strtok(bufferPosicion,";\n");
-                char bufferNoEncontrando[10];
-                char* puntBufferNoEncontrado;
-                                        int numero = atoi(bufferTS);
+
+                // Formateo el CTE_INT y lo inserto en la tabla de simbolos
+                sprintf(bufferTS,"%d", $1);
+                puntBufferTs = strtok(bufferTS,";\n");
+                int numero = atoi(bufferTS);
+                insertarTS(puntBufferTs, "CONST_INT", "", numero, 0);
+
+                // Inserto en la lista el lugar de ocurrencia
                 sprintf(bufferPosicion,"%d", insertarLista(numero, indicePosicion));
                 puntBufferPosicion = strtok(bufferPosicion,";\n");
-                sprintf(bufferNoEncontrando,"%d", 9999);
-                puntBufferNoEncontrado = strtok(bufferNoEncontrando,";\n");
+
+                // Agrego el elemento a la TS (para luego poder utilizarlo)
+                insertarTS(puntBufferTs, "CONST_INT", "", insertarLista(numero, indicePosicion), 0);
+
                 _condPosicion = newNode( "IF",
-                 newNode("=", newLeaf(puntBufferNombrePivot) , newLeaf( puntBufferTs ) ) ,
-                            newNode("=", newLeaf("@resultado") , newLeaf( puntBufferPosicion )));
-                insertarTS(puntBufferNoEncontrado, "CONST_INT", "", 9999, 0);
-                                        insertarTS(puntBufferTs, "CONST_INT", "", insertarLista(numero, indicePosicion), 0);
+                 newNode("=", newLeaf(puntBufferNombrePivot) , newLeaf( puntBufferTs )) ,
+                 newNode("=", newLeaf("@resultado") , newLeaf( puntBufferPosicion ))
+                 );
+
+                // Creo un nuevo nodo                        
                 _posicion = newNode(";", newNode("=", newLeaf("@resultado") , newLeaf( puntBufferNoEncontrado )), _condPosicion);
-                insertarTS(puntBufferTs, "CONST_INT", "", numero, 0);
+
+                // Aumento el contador
                 contadorConstantes++;
+
                 printf("\n Regla 8 - lista: CTE_INT \n");
                 }
   | lista COMA CTE_INT {
+                        // Aumento la posicion
                         indicePosicion++;
+
                         sprintf(bufferTS,"%d", $3);
                         puntBufferTs = strtok(bufferTS,";\n");
+
+                        // Formateo el CTE_INT y lo inserto en la tabla de simbolos
                         int numero = atoi(bufferTS);
+                        insertarTS(puntBufferTs, "CONST_INT", "", numero, 0);
+
+                                               
+                        // Agrego el elemento a la TS (para luego poder utilizarlo)
                         sprintf(bufferPosicion,"%d", insertarLista(numero, indicePosicion));
                         puntBufferPosicion = strtok(bufferPosicion,";\n");
+                        insertarTS(puntBufferPosicion, "CONST_INT", "", insertarLista(numero, indicePosicion), 0);
+                        
                         _condPosicion = newNode( "IF", newNode("=", newLeaf(puntBufferNombrePivot) , newLeaf( puntBufferTs ) ) , newNode("=", newLeaf("@resultado") , newLeaf( puntBufferPosicion ) ));
-                        insertarTS(puntBufferTs, "CONST_INT", "", insertarLista(numero, indicePosicion), 0);
                         _posicion = newNode(";", _posicion , _condPosicion );
-                        insertarTS(puntBufferTs, "CONST_INT", "", numero, 0);
+
+                        // Aumento el contador
+                        contadorConstantes++;
+
                         printf("\n Regla 9 - lista: lista COMA CTE_INT \n");
-                                        contadorConstantes++;
                         }
   ;
 
@@ -264,6 +283,13 @@ int main(int argc, char *argv[])
     else
     {
         crearTablaTS();
+        insertarTS("_elemento_no_encontrado", "CONST_STR", "\"Elemento no encontrado\"", 0, 0);
+        insertarTS("_lista_vacia", "CONST_STR", "\"Lista vacia\"", 0, 0);
+        insertarTS("_0", "CONST_INT", "", 0, 0);
+        insertarTS("_1", "CONST_INT", "", 1, 0);
+        sprintf(bufferNoEncontrando,"%d", 9999);
+        puntBufferNoEncontrado = strtok(bufferNoEncontrando,";\n");
+        insertarTS(puntBufferNoEncontrado, "CONST_INT", "", 9999, 0);
         yyparse();
     }
 

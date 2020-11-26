@@ -1,0 +1,1 @@
+Entiendo que en assembler se puede generar código para saltar a un branch que muestre dicho mensaje y luego finalice el programa, pero resultaria necesario plasmar esto en la notación intermedia (árbol, en este caso) ?.

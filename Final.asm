@@ -11,11 +11,11 @@ include number.asm
 @resultado     dd             ?              
 _elemento_no_encontrado_1                                   db             "Elemento no encontrado", '$', 22 dup (?)
 _lista_vacia_2                                              db             "Lista vacia", '$', 11 dup (?)
+_0             dd             0.0            
+_1             dd             1.0            
+_9999          dd             9999.0         
 _Ingrese_un_valor_pivot_mayor_o_igual_a_1____3              db             "Ingrese un valor pivot mayor o igual a 1: ", '$', 42 dup (?)
 pivot          dd             ?              
-_1             dd             1.0            
-_0             dd             0.0            
-_9999          dd             9999.0         
 _2             dd             2.0            
 _3             dd             3.0            
 _4             dd             4.0            
