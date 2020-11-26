@@ -16,8 +16,8 @@ _1             dd             1.0
 _9999          dd             9999.0         
 _Ingrese_un_valor_pivot_mayor_o_igual_a_1____3              db             "Ingrese un valor pivot mayor o igual a 1: ", '$', 42 dup (?)
 pivot          dd             ?              
-_2             dd             2.0            
 _3             dd             3.0            
+_2             dd             2.0            
 _4             dd             4.0            
 resul          dd             ?              
 _Elemento_encontrado_en_posicion____4                       db             "Elemento encontrado en posicion: ", '$', 33 dup (?)
@@ -37,23 +37,9 @@ NEWLINE
 GetFloat pivot
 NEWLINE
 
-;Codigo if
-fld pivot
-fstp @ifI
-fld _2
-fstp @ifD
-fld @ifI
-fld @ifD
-fxch
-fcom 
-fstsw AX
-sahf
-jne branch0
-fld _0
-fld _1
-FADD
+;Comienza el codigo de posicion
+fld _9999
 fstp @resultado
-branch0:
 
 ;Codigo if
 fld pivot
@@ -66,10 +52,24 @@ fxch
 fcom 
 fstsw AX
 sahf
+jne branch0
+fld _0
+fstp @resultado
+branch0:
+
+;Codigo if
+fld pivot
+fstp @ifI
+fld _2
+fstp @ifD
+fld @ifI
+fld @ifD
+fxch
+fcom 
+fstsw AX
+sahf
 jne branch1
 fld _1
-fld _1
-FADD
 fstp @resultado
 branch1:
 
@@ -86,8 +86,6 @@ fstsw AX
 sahf
 jne branch2
 fld _2
-fld _1
-FADD
 fstp @resultado
 branch2:
 
@@ -104,25 +102,35 @@ fstsw AX
 sahf
 jne branch3
 fld _3
-fld _1
-FADD
 fstp @resultado
 branch3:
 fld @resultado
-fld _0
-FCOM
+fstp resul
+
+;Validacion de elemento no encontrado
+fld resul
+fstp @ifI
+fld _9999
+fstp @ifD
+fld @ifI
+fld @ifD
+fxch
+fcom 
 fstsw AX
 sahf
-je branch9999
-fld @resultado
-fstp resul
-displayString _Elemento_encontrado_en_posicion____4
-NEWLINE
-DisplayFloat resul,1
+jne branch4
+displayString _elemento_no_encontrado_1
 NEWLINE
 JMP FOOTER
-branch9999:
-displayString _elemento_no_encontrado_1
+NEWLINE
+branch4:
+displayString _Elemento_encontrado_en_posicion____4
+NEWLINE
+fld resul
+fld _1
+FADD
+fstp resul
+DisplayFloat resul,1
 NEWLINE
 JMP FOOTER
 branch10000:

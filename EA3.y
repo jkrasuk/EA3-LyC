@@ -96,8 +96,8 @@ char bufferNoEncontrando[10];
 char* puntBufferNoEncontrado;
 bool esValor(const char *);
 
-int  i=0, contadorString = 0, contadorId = 0;
-ast * _write, * _read, *_asig, * _posicion, *_fact, *_condPosicion;
+int  i=0, contadorString = 0, contadorId = 0, funcionPosicion = 0, branchElementoNoEncontrado=0;
+ast * _write, * _read, *_asig, * _posicion, *_fact, *_condPosicion, *_validacionPosicion;
 ast* _pProg ,* _pSent;
 ast* _aux;
 FILE*  intermedia;
@@ -155,7 +155,20 @@ s:
   }
   ;
 
-prog: prog sent {_pProg = newNode(";", _pProg, _pSent); printf("\n Regla 2 - prog: prog sent \n");}
+prog: prog sent {
+    
+    _pProg = newNode(";", _pProg, _pSent); 
+    
+    if(funcionPosicion){
+
+            
+            _pProg = newNode(";", _pProg, newNode("IF",
+                newNode("=", newLeaf(puntBufferTs), newLeaf("_9999")),
+                newNode("WRITE", NULL, newLeaf("_elemento_no_encontrado_1"))
+             )); 
+    }
+    
+    printf("\n Regla 2 - prog: prog sent \n");}
   | sent {_pProg = _pSent; printf("\n Regla 1 - prog: sent \n");}
   ;
 
@@ -173,6 +186,7 @@ read: READ ID {
                 }
                 _read = newNode("READ", NULL ,newLeaf(puntBufferTs));
                 printf("\n Regla 4 - read: read ID \n");
+                funcionPosicion = 0;
                 }
   ;
 
@@ -185,6 +199,7 @@ asig: ID ASIG posicion {
                           }
                           _asig = newNode("=", newLeaf(puntBufferTs) , _posicion );                                 
                           printf("\n Regla 5 - asig: ID ASIG posicion \n");
+                          funcionPosicion = 1;
                           }
   ;
 
@@ -262,12 +277,14 @@ write: WRITE CTE_STRING {
                           insertarTS(puntBufferTs, "CONST_STR", puntBufferTs, 0, 0);
                           _write = newNode("WRITE", NULL, newLeaf(puntBufferTs));
                           printf("\n Regla 10 - write: WRITE CTE_STRING \n");
+                        funcionPosicion = 0;
                           }
   | WRITE ID {
               sprintf(bufferTS,"%s", $2);
               puntBufferTs = strtok(bufferTS,";\n");
                _write = newNode("WRITE", NULL, newLeaf(puntBufferTs));
               printf("\n Regla 11 - write: WRITE ID \n");
+                                      funcionPosicion = 0;
               }
   ;
 
@@ -287,7 +304,7 @@ int main(int argc, char *argv[])
         insertarTS("_lista_vacia", "CONST_STR", "\"Lista vacia\"", 0, 0);
         insertarTS("_0", "CONST_INT", "", 0, 0);
         insertarTS("_1", "CONST_INT", "", 1, 0);
-        sprintf(bufferNoEncontrando,"%d", 9999);
+        sprintf(bufferNoEncontrando,"_%d", 9999);
         puntBufferNoEncontrado = strtok(bufferNoEncontrando,";\n");
         insertarTS(puntBufferNoEncontrado, "CONST_INT", "", 9999, 0);
         yyparse();
@@ -746,9 +763,6 @@ void crearSeccionCode(FILE *archAssembler)
 void generaFooter(FILE *archAssembler)
 {
     fprintf(archAssembler, "JMP FOOTER\n"); //aca para cuando no dio resultados
-    fprintf(archAssembler, "branch%d:\n", branchFinalizoSinResultados ); //aca para cuando no dio resultados
-    fprintf(archAssembler, "displayString _elemento_no_encontrado_1\nNEWLINE\n");
-    fprintf(archAssembler, "JMP FOOTER\n"); //aca para cuando no dio resultados
     fprintf(archAssembler, "branch%d:\n", branchListaVacia ); //aca para cuando no dio resultados
     fprintf(archAssembler, "displayString _lista_vacia_2\nNEWLINE\n");
     fprintf(archAssembler, "FOOTER:"); //aca para cuando no dio resultados
@@ -775,9 +789,19 @@ void recorrerArbol( ast * root, FILE *archAssembler)
         if( strcmp(lexema->data.tipo, "CONST_STR") == 0 )
         {
             fprintf(archAssembler, "displayString %s\nNEWLINE\n", lexema->data.nombreASM);
+            if(branchElementoNoEncontrado){
+                branchElementoNoEncontrado = 0;
+                fprintf(archAssembler, "JMP FOOTER\nNEWLINE\n");
+                fprintf(archAssembler, "branch%d:\n", branchN ); //aca cae si dio false
+                branchN++;  
+            }
         }
         else
         {
+            fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM); //cargo el lado derecho
+            fprintf(archAssembler, "fld _1\n"); //cargo el lado derecho
+            fprintf(archAssembler, "FADD\n"); //Sumo
+            fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM); //Sumo
             fprintf(archAssembler, "DisplayFloat %s,1\nNEWLINE\n", lexema->data.nombreASM);
         }
     }
@@ -789,7 +813,25 @@ void recorrerArbol( ast * root, FILE *archAssembler)
     else if ( strcmp(root->value,"=") == 0 )
     {
         fueAsignacion = true;
-        if (strcmp(root->right->value,"=") == 0 )
+
+
+        if(strcmp(root->right->value, "_9999") == 0)
+        {
+            fprintf(archAssembler, "\n;Validacion de elemento no encontrado\n");
+            t_simbolo *lexemaI = getLexema( root->left->value );
+            fprintf(archAssembler, "fld %s\n", lexemaI->data.nombreASM);
+            fprintf(archAssembler, "fstp @ifI\n");
+            t_simbolo *lexemaD = getLexema( root->right->value );
+            fprintf(archAssembler, "fld %s\n", lexemaD->data.nombreASM);
+            fprintf(archAssembler, "fstp @ifD\n");
+            fprintf(archAssembler, "fld @ifI\n");       //carga @ifI
+            fprintf(archAssembler, "fld @ifD\n");       //carga @ifD
+            fprintf(archAssembler, "fxch\n");           //intercambia las posiciones 0 y 1
+            fprintf(archAssembler, "fcom \n");          //compara
+            fprintf(archAssembler, "fstsw AX\nsahf\n"); //no se si porque sentencia es necesaria
+            fprintf(archAssembler, "jne branch%d\n", branchN );// si dio false, salteate lo siguiente
+            branchElementoNoEncontrado = 1;
+        } else if (strcmp(root->right->value,"=") == 0 )
         {
             //cuando el maximo contiene un solo elemento es mas facil poner el codigo aca que llamar a las otras funciones.
             t_simbolo *lexema = getLexema( root->right->right->value );
@@ -823,9 +865,8 @@ void    generarAssemblerAsignacionSimple( ast * root, FILE *archAssembler )
     if(contadorConstantes == 0){
               fprintf(archAssembler, "je branch%d\n", branchListaVacia );// si dio false, salteate lo siguiente
     }else{
+
       fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM); //cargo el lado derecho
-      fprintf(archAssembler, "fld _1\n"); //cargo el lado derecho
-      fprintf(archAssembler, "FADD\n"); //Sumo
       lexema = getLexema( root->left->value );
       fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM ); //lo guardo en la variable del lado izquierdo
     }
@@ -837,9 +878,10 @@ void    generarAssemblerMax( ast * root, FILE *archAssembler)
 
     if ( strcmp(root->value,"=") == 0 )
     {
-
-        // fprintf(archAssembler, "\n;Comienza el codigo de maximo\n");
-        // generarAssemblerAsignacionSimple( root, archAssembler);
+        if(strcmp(root->right->value,"_9999") == 0){
+            fprintf(archAssembler, "\n;Comienza el codigo de posicion\n");
+            generarAssemblerAsignacionSimple( root, archAssembler);
+        }
     }
     else
     {
@@ -868,17 +910,6 @@ void    generarAssemblerMax( ast * root, FILE *archAssembler)
             generarAssemblerAsignacionSimple( root->right, archAssembler); //como se que siempre va ser una asignacion ya le llamo esto
             fprintf(archAssembler, "branch%d:\n", branchN ); //aca cae si dio false
             branchN++;                                  //sumo el numero de branch
-
-            // Si ya termine de recorrer todas las ctes, entonces voy a mostrar los mensajes de error pertinentes
-            if(branchN == contadorConstantes){
-              // si resultado == 0
-              // entonces finalizo el programa
-              fprintf(archAssembler, "fld @resultado\n");
-              fprintf(archAssembler, "fld _0\n");
-              fprintf(archAssembler, "FCOM\n");
-              fprintf(archAssembler, "fstsw AX\nsahf\n"); //no se si porque sentencia es necesaria
-              fprintf(archAssembler, "je branch%d\n", branchFinalizoSinResultados );// si dio false, salteate lo siguiente
-            }
         }
         else if ( root->right != NULL )
         {

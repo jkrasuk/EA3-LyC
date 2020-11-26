@@ -11,23 +11,21 @@
 
           ;
 
-                                                                      3
+                                                  _elemento_no_encontrado_1
 
-                                                            =
+                                        WRITE
 
-                                                                      @resultado
+                              IF
 
-                                                  IF
+                                                  _9999
 
-                                                                      4
+                                        =
 
-                                                            =
+                                                  resul
 
-                                                                      pivot
+                    ;
 
-                                        ;
-
-                                                                                2
+                                                                                3
 
                                                                       =
 
@@ -35,7 +33,7 @@
 
                                                             IF
 
-                                                                                1
+                                                                                4
 
                                                                       =
 
@@ -43,7 +41,7 @@
 
                                                   ;
 
-                                                                                          1
+                                                                                          2
 
                                                                                 =
 
@@ -51,7 +49,7 @@
 
                                                                       IF
 
-                                                                                          3
+                                                                                          1
 
                                                                                 =
 
@@ -59,7 +57,7 @@
 
                                                             ;
 
-                                                                                                    0
+                                                                                                    1
 
                                                                                           =
 
@@ -75,24 +73,40 @@
 
                                                                       ;
 
-                                                                                          9999
+                                                                                                              0
 
-                                                                                =
+                                                                                                    =
 
-                                                                                          @resultado
+                                                                                                              @resultado
 
-                              =
+                                                                                          IF
 
-                                        resul
+                                                                                                              3
 
-                    ;
+                                                                                                    =
 
-                                                  pivot
+                                                                                                              pivot
 
-                                        READ
+                                                                                ;
+
+                                                                                                    _9999
+
+                                                                                          =
+
+                                                                                                    @resultado
+
+                                        =
+
+                                                  resul
 
                               ;
 
-                                                  "Ingrese un valor pivot mayor o igual a 1: "
+                                                            pivot
 
-                                        WRITE
+                                                  READ
+
+                                        ;
+
+                                                            "Ingrese un valor pivot mayor o igual a 1: "
+
+                                                  WRITE
