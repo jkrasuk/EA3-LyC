@@ -45,16 +45,17 @@ void recorrerArbol(ast *root, FILE *archAssembler)
 {
     bool fueAsignacion = false;
     bool fueValidacionListaVacia = false;
-    //printf( "%s\t", root->value);
 
+    // En caso de que exista un nodo por izquierda, se sigue el recorrido (de forma recursiva)
     if (root->left != NULL)
     {
         recorrerArbol(root->left, archAssembler);
     }
 
-    if ((strcmp(root->value, ";") == 0))
+    if ((strcmp(root->value, PUNTO_Y_COMA) == 0))
     {
-        if (root->right && root->right->right && root->right->right->value && strcmp(root->right->right->value, "_valorNoDeterminado") == 0)
+        // Caso utilizado 
+        if (root->right && root->right->right && root->right->right->value && strcmp(root->right->right->value, VALOR_NO_DETERMINADO) == 0)
         {
             fueValidacionListaVacia = true;
             t_simbolo *lexema = getLexema(root->right->right->value);
@@ -64,10 +65,10 @@ void recorrerArbol(ast *root, FILE *archAssembler)
             fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM); //lo guardo en la variable del lado izquierdo
         }
     }
-    else if (strcmp(root->value, "WRITE") == 0)
+    else if (strcmp(root->value, WRITE_NODE) == 0)
     {
         t_simbolo *lexema = getLexema(root->right->value);
-        if (strcmp(lexema->data.tipo, "CONST_STR") == 0)
+        if (strcmp(lexema->data.tipo, CONST_STR) == 0)
         {
             fprintf(archAssembler, "displayString %s\nNEWLINE\n", lexema->data.nombreASM);
             if (branchElementoNoEncontrado)
@@ -94,7 +95,7 @@ void recorrerArbol(ast *root, FILE *archAssembler)
             fprintf(archAssembler, "DisplayFloat %s,1\nNEWLINE\n", lexema->data.nombreASM);
         }
     }
-    else if (strcmp(root->value, "READ") == 0)
+    else if (strcmp(root->value, READ_NODE) == 0)
     {
         t_simbolo *lexema = getLexema(root->right->value);
         fprintf(archAssembler, "GetFloat %s\nNEWLINE\n", lexema->data.nombreASM); //directamente levanto un float porque sino rompe la division
@@ -103,7 +104,7 @@ void recorrerArbol(ast *root, FILE *archAssembler)
     {
         fueAsignacion = true;
 
-        if (strcmp(root->right->value, "_valorNoDeterminado") == 0)
+        if (strcmp(root->right->value, VALOR_NO_DETERMINADO) == 0)
         {
             fprintf(archAssembler, "\n;Validacion de elemento no encontrado\n");
             t_simbolo *lexemaI = getLexema(root->left->value);
@@ -128,7 +129,7 @@ void recorrerArbol(ast *root, FILE *archAssembler)
             lexema = getLexema(root->left->value);
             fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM); //lo guardo en la variable del lado izquierdo
         }
-        else if (strcmp(root->right->value, ";") == 0)
+        else if (strcmp(root->right->value, PUNTO_Y_COMA) == 0)
         {
             generarAssemblerAsignacion(root->right, archAssembler);
             t_simbolo *lexema = getLexema(root->left->value);
@@ -179,7 +180,7 @@ void generarAssemblerMax(ast *root, FILE *archAssembler)
 {
     if (strcmp(root->value, "=") == 0)
     {
-        if (strcmp(root->right->value, "_valorNoDeterminado") == 0)
+        if (strcmp(root->right->value, VALOR_NO_DETERMINADO) == 0)
         {
             fprintf(archAssembler, "\n;Comienza el codigo de posicion\n");
             generarAssemblerAsignacionSimple(root, archAssembler);
@@ -192,7 +193,7 @@ void generarAssemblerMax(ast *root, FILE *archAssembler)
         {
             generarAssemblerMax(root->left, archAssembler);
         }
-        if (strcmp(root->value, "IF") == 0)
+        if (strcmp(root->value, IF) == 0)
         {
             fprintf(archAssembler, "\n;Codigo if\n");
             // printf("izq izq es %s", root->left->left->value  );
@@ -227,14 +228,12 @@ void crearSeccionData(FILE *archAssembler, t_tabla *tablaTS)
 
     fprintf(archAssembler, "%s\n\n", ".DATA");
 
-    //char linea[100];
     while (tablaSimbolos)
     {
         aux = tablaSimbolos;
         tablaSimbolos = tablaSimbolos->next;
         if (strcmp(aux->data.tipo, "INT") == 0)
         {
-            //sprintf(linea, "%-35s%-30s%-30s%-d\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
             fprintf(archAssembler, "%-50s%-15s%-15s\n", aux->data.nombre, "dd", "?");
         }
         else if (strcmp(aux->data.tipo, "FLOAT") == 0)
@@ -245,7 +244,7 @@ void crearSeccionData(FILE *archAssembler, t_tabla *tablaTS)
         {
             fprintf(archAssembler, "%-50s%-15s%-15s\n", aux->data.nombreASM, "db", "?");
         }
-        else if (strcmp(aux->data.tipo, "CONST_INT") == 0)
+        else if (strcmp(aux->data.tipo, CONST_INT) == 0)
         {
             char valor[50];
             sprintf(valor, "%d.0", aux->data.valor.valor_int);
@@ -257,14 +256,12 @@ void crearSeccionData(FILE *archAssembler, t_tabla *tablaTS)
             sprintf(valor, "%g", aux->data.valor.valor_double);
             fprintf(archAssembler, "%-50s%-15s%-15s\n", aux->data.nombreASM, "dd", valor);
         }
-        else if (strcmp(aux->data.tipo, "CONST_STR") == 0)
+        else if (strcmp(aux->data.tipo, CONST_STR) == 0)
         {
             char valor[200];
             sprintf(valor, "%s, '$', %d dup (?)", aux->data.valor.valor_str, strlen(aux->data.valor.valor_str) - 2);
             fprintf(archAssembler, "%-50s%-15s%-15s\n", aux->data.nombreASM, "db", valor);
         }
-        //fprintf(archAssembler, "%s", linea);
-        //free(aux);
     }
     fprintf(archAssembler, "%-50s%-15s%-15s%-15s\n", "@ifI", "dd", "?", "; Variable para condición izquierda");
     fprintf(archAssembler, "%-50s%-15s%-15s%-15s\n", "@ifD", "dd", "?", "; Variable para condición derecha");
@@ -284,7 +281,7 @@ void crearSeccionCode(FILE *archAssembler)
 }
 void generaFooter(FILE *archAssembler)
 {
-    fprintf(archAssembler, "FOOTER:"); //aca para cuando no dio resultados
-    fprintf(archAssembler, "\n%-30s%-30s\n", "mov AX,4C00h", "; Indica que debe finalizar la ejecución");
+    fprintf(archAssembler, "FOOTER:");
+    fprintf(archAssembler, "\n%-30s\n", "mov AX,4C00h");
     fprintf(archAssembler, "%s\n\n%s", "int 21h", "END inicio");
 }

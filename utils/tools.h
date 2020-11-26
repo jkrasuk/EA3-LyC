@@ -1,9 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <stdbool.h>
-#include "tree.h"
-#include "list.h"
-#include "ts.h"
-#include "assembler.h"
+#define PUNTO_Y_COMA ";"
+#define ELEMENTO_NO_ENCONTRADO "\"Elemento no encontrado\""
+#define LISTA_VACIA "\"Lista vacia\""
+#define VALOR_NO_DETERMINADO "_valorNoDeterminado"
+#define CONST_INT "CONST_INT"
+#define CONST_STR "CONST_STR"
+#define WRITE_NODE "WRITE"
+#define READ_NODE "READ"
+#define IF "IF"

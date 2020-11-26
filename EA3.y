@@ -5,6 +5,10 @@
 #include <ctype.h> 
 #include <stdbool.h>
 #include "./utils/tools.h"
+#include "./utils/tree.h"
+#include "./utils/list.h"
+#include "./utils/ts.h"
+#include "./utils/assembler.h"
 #define YYDEBUG 0
 
 extern int yylex();
@@ -56,27 +60,27 @@ s:
   ;
 
 prog: prog sent {
-    _pProg = newNode(";", _pProg, _pSent); 
+    _pProg = newNode(PUNTO_Y_COMA, _pProg, _pSent); 
     
     if(funcionPosicion)
     {
-        _nodoComprobacionValidacion = newNode("=", newLeaf(puntBufferTs), newLeaf("_valorNoDeterminado"));
+        _nodoComprobacionValidacion = newNode("=", newLeaf(puntBufferTs), newLeaf(VALOR_NO_DETERMINADO));
         if(tengoLista)
         {
-            _nodoMensajeValidacion = newNode("WRITE", NULL, newLeaf("\"Elemento no encontrado\""));
+            _nodoMensajeValidacion = newNode(WRITE_NODE, NULL, newLeaf(ELEMENTO_NO_ENCONTRADO));
         }
         else
         {
-            _nodoMensajeValidacion = newNode("WRITE", NULL, newLeaf("\"Lista vacia\""));
+            _nodoMensajeValidacion = newNode(WRITE_NODE, NULL, newLeaf(LISTA_VACIA));
         }
 
-        _pProg = newNode(";", _pProg, newNode("IF", _nodoComprobacionValidacion, _nodoMensajeValidacion));
+        _pProg = newNode(PUNTO_Y_COMA, _pProg, newNode(IF, _nodoComprobacionValidacion, _nodoMensajeValidacion));
     }
     else if(funcionRead)
     {
         _nodoComprobacionValidacion = newNode("<", newLeaf(puntBufferTs), newLeaf("_1"));
-        _nodoMensajeValidacion = newNode("WRITE", NULL, newLeaf("\"El valor debe ser >= 1\""));
-        _pProg = newNode(";", _pProg, newNode("IF", _nodoComprobacionValidacion, _nodoMensajeValidacion));
+        _nodoMensajeValidacion = newNode(WRITE_NODE, NULL, newLeaf("\"El valor debe ser >= 1\""));
+        _pProg = newNode(PUNTO_Y_COMA, _pProg, newNode(IF, _nodoComprobacionValidacion, _nodoMensajeValidacion));
     }
 
     printf("\n Regla 2 - prog: prog sent \n");
@@ -96,7 +100,7 @@ read: READ ID {
                 {
                   fprintf(stdout, "%s%s%s", "Error: la variable '", puntBufferTs, "' ya fue declarada");
                 }
-                _read = newNode("READ", NULL ,newLeaf(puntBufferTs));
+                _read = newNode(READ_NODE, NULL ,newLeaf(puntBufferTs));
                 printf("\n Regla 4 - read: read ID \n");
                 funcionPosicion = 0;
                 funcionRead = 1;
@@ -121,8 +125,7 @@ posicion:
   POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} lista CC PARC {tengoLista = 1; printf("\n Regla 6 - posicion: POSICION PARA ID PYC CA lista CC PARC \n");}
   | POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} CC PARC {
     tengoLista = 0;
-    // Agrego una hoja con el -1
-    _posicion = newLeaf("_valorNoDeterminado");
+    _posicion = newLeaf(VALOR_NO_DETERMINADO);
 
     printf("\n Regla 6 - posicion: POSICION PARA ID PYC CA CC PARC \n");}
   ;
@@ -137,22 +140,22 @@ lista: CTE_INT {
                 sprintf(bufferTS,"%d", $1);
                 puntBufferTs = strtok(bufferTS,";\n");
                 int numero = atoi(bufferTS);
-                insertarTS(puntBufferTs, "CONST_INT", "", numero, 0);
+                insertarTS(puntBufferTs, CONST_INT, "", numero, 0);
 
                 // Inserto en la lista el lugar de ocurrencia
                 sprintf(bufferPosicion,"%d", insertarLista(numero, indicePosicion));
                 puntBufferPosicion = strtok(bufferPosicion,";\n");
 
                 // Agrego el elemento a la TS (para luego poder utilizarlo)
-                insertarTS(puntBufferTs, "CONST_INT", "", insertarLista(numero, indicePosicion), 0);
+                insertarTS(puntBufferTs, CONST_INT, "", insertarLista(numero, indicePosicion), 0);
 
-                _condPosicion = newNode( "IF",
+                _condPosicion = newNode( IF,
                  newNode("=", newLeaf(puntBufferNombrePivot) , newLeaf( puntBufferTs )) ,
                  newNode("=", newLeaf("@resultado") , newLeaf( puntBufferPosicion ))
                  );
 
                 // Creo un nuevo nodo                        
-                _posicion = newNode(";", newNode("=", newLeaf("@resultado") , newLeaf( "_valorNoDeterminado" )), _condPosicion);
+                _posicion = newNode(PUNTO_Y_COMA, newNode("=", newLeaf("@resultado") , newLeaf( VALOR_NO_DETERMINADO )), _condPosicion);
 
                 printf("\n Regla 8 - lista: CTE_INT \n");
                 }
@@ -165,16 +168,16 @@ lista: CTE_INT {
 
                         // Formateo el CTE_INT y lo inserto en la tabla de simbolos
                         int numero = atoi(bufferTS);
-                        insertarTS(puntBufferTs, "CONST_INT", "", numero, 0);
+                        insertarTS(puntBufferTs, CONST_INT, "", numero, 0);
 
                                                
                         // Agrego el elemento a la TS (para luego poder utilizarlo)
                         sprintf(bufferPosicion,"%d", insertarLista(numero, indicePosicion));
                         puntBufferPosicion = strtok(bufferPosicion,";\n");
-                        insertarTS(puntBufferPosicion, "CONST_INT", "", insertarLista(numero, indicePosicion), 0);
+                        insertarTS(puntBufferPosicion, CONST_INT, "", insertarLista(numero, indicePosicion), 0);
                         
-                        _condPosicion = newNode( "IF", newNode("=", newLeaf(puntBufferNombrePivot) , newLeaf( puntBufferTs ) ) , newNode("=", newLeaf("@resultado") , newLeaf( puntBufferPosicion ) ));
-                        _posicion = newNode(";", _posicion , _condPosicion );
+                        _condPosicion = newNode( IF, newNode("=", newLeaf(puntBufferNombrePivot) , newLeaf( puntBufferTs ) ) , newNode("=", newLeaf("@resultado") , newLeaf( puntBufferPosicion ) ));
+                        _posicion = newNode(PUNTO_Y_COMA, _posicion , _condPosicion );
 
 
                         printf("\n Regla 9 - lista: lista COMA CTE_INT \n");
@@ -184,17 +187,17 @@ lista: CTE_INT {
 write: WRITE CTE_STRING {
                             sprintf(bufferTS,"%s", $2);
                             puntBufferTs = strtok(bufferTS,";\n");
-                            insertarTS(puntBufferTs, "CONST_STR", puntBufferTs, 0, 0);
-                            _write = newNode("WRITE", NULL, newLeaf(puntBufferTs));
-                            printf("\n Regla 10 - write: WRITE CTE_STRING \n");
+                            insertarTS(puntBufferTs, CONST_STR, puntBufferTs, 0, 0);
+                            _write = newNode(WRITE_NODE, NULL, newLeaf(puntBufferTs));
+                            printf("\n Regla 10 - write: WRITE_NODE CTE_STRING \n");
                             funcionPosicion = 0;
                             funcionRead = 0;
                           }
   | WRITE ID {
                 sprintf(bufferTS,"%s", $2);
                 puntBufferTs = strtok(bufferTS,";\n");
-                _write = newNode("WRITE", NULL, newLeaf(puntBufferTs));
-                printf("\n Regla 11 - write: WRITE ID \n");
+                _write = newNode(WRITE_NODE, NULL, newLeaf(puntBufferTs));
+                printf("\n Regla 11 - write: WRITE_NODE ID \n");
                 funcionPosicion = 0;
                 funcionRead = 0;
               }

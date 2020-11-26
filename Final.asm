@@ -152,7 +152,7 @@ fstp resul
 DisplayFloat resul,1
 NEWLINE
 FOOTER:
-mov AX,4C00h                  ; Indica que debe finalizar la ejecución
+mov AX,4C00h                  
 int 21h
 
 END inicio

@@ -112,7 +112,7 @@ void recorrerArbolGraphviz(ast *arbol, FILE *pf)
     }
 
     if (strchr(arbol->value, '\"'))
-        if (strcmp(arbol->value, "\"Elemento no encontrado\"") == 0 || strcmp(arbol->value, "\"El valor debe ser >= 1\"") == 0 || strcmp(arbol->value, "\"Lista vacia\"") == 0)
+        if (strcmp(arbol->value, ELEMENTO_NO_ENCONTRADO) == 0 || strcmp(arbol->value, "\"El valor debe ser >= 1\"") == 0 || strcmp(arbol->value, LISTA_VACIA) == 0)
         {
             fprintf(pf, " N%d [peripheries=2; label = %s]\n", arbol->nodeId, arbol->value);
         }

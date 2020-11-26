@@ -49,12 +49,12 @@ t_tabla *obtenerTablaTS()
 void inicializarTS()
 {
     crearTablaTS();
-    insertarTS("_elemento_no_encontrado", "CONST_STR", "\"Elemento no encontrado\"", 0, 0);
-    insertarTS("_valor_menor_a_1", "CONST_STR", "\"El valor debe ser >= 1\"", 0, 0);
-    insertarTS("_lista_vacia", "CONST_STR", "\"Lista vacia\"", 0, 0);
-    insertarTS("_0", "CONST_INT", "", 0, 0);
-    insertarTS("_1", "CONST_INT", "", 1, 0);
-    insertarTS("_valorNoDeterminado", "CONST_INT", "", -1, 0);
+    insertarTS("_elemento_no_encontrado", CONST_STR, ELEMENTO_NO_ENCONTRADO, 0, 0);
+    insertarTS("_valor_menor_a_1", CONST_STR, "\"El valor debe ser >= 1\"", 0, 0);
+    insertarTS("_lista_vacia", CONST_STR, LISTA_VACIA, 0, 0);
+    insertarTS("_0", CONST_INT, "", 0, 0);
+    insertarTS("_1", CONST_INT, "", 1, 0);
+    insertarTS(VALOR_NO_DETERMINADO, CONST_INT, "", -1, 0);
 }
 void crearTablaTS()
 {
@@ -90,7 +90,7 @@ int insertarTS(const char *nombre, const char *tipo, const char *valString, int 
         {
             return 1;
         }
-        else if (strcmp(tabla->data.tipo, "CONST_STR") == 0)
+        else if (strcmp(tabla->data.tipo, CONST_STR) == 0)
         {
 
             if (strcmp(tabla->data.valor.valor_str, valString) == 0)
@@ -98,7 +98,7 @@ int insertarTS(const char *nombre, const char *tipo, const char *valString, int 
                 return 1;
             }
         }
-        else if (strcmp(tabla->data.tipo, "CONST_INT") == 0 && strcmp(tipo, "CONST_INT") == 0)
+        else if (strcmp(tabla->data.tipo, CONST_INT) == 0 && strcmp(tipo, CONST_INT) == 0)
         {
 
             if (tabla->data.valor.valor_int == valInt)
@@ -167,7 +167,7 @@ t_data *crearDatos(const char *nombre, const char *tipo, const char *valString, 
     }
     else
     {
-        if (strcmp(tipo, "CONST_STR") == 0)
+        if (strcmp(tipo, CONST_STR) == 0)
         {
             contadorString++;
 
@@ -187,7 +187,7 @@ t_data *crearDatos(const char *nombre, const char *tipo, const char *valString, 
             strcpy(data->nombre, full);
             strcpy(data->nombreASM, data->nombre);
         }
-        if (strcmp(tipo, "CONST_INT") == 0)
+        if (strcmp(tipo, CONST_INT) == 0)
         {
             if (valInt == -1)
             {
@@ -238,11 +238,11 @@ void guardarTS()
         {
             sprintf(linea, "%-60s%-20s%-50s%-15s\n", aux->data.nombre, aux->data.tipo, "-", "-");
         }
-        else if (strcmp(aux->data.tipo, "CONST_INT") == 0)
+        else if (strcmp(aux->data.tipo, CONST_INT) == 0)
         {
             sprintf(linea, "%-60s%-20s%-50d%-15d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_int, strlen(aux->data.nombre) - 1);
         }
-        else if (strcmp(aux->data.tipo, "CONST_STR") == 0)
+        else if (strcmp(aux->data.tipo, CONST_STR) == 0)
         {
             sprintf(linea, "%-60s%-20s%-50s%-15d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_str, strlen(aux->data.valor.valor_str) - 2);
         }
@@ -268,7 +268,7 @@ t_simbolo *getLexema(const char *valor)
         esID = strcmp(tablaSimbolos->data.nombre, nombreLimpio);
         esCTE = strcmp(tablaSimbolos->data.nombre, nombreCTE);
         esASM = strcmp(tablaSimbolos->data.nombreASM, valor);
-        if (strcmp(tablaSimbolos->data.tipo, "CONST_STR") == 0)
+        if (strcmp(tablaSimbolos->data.tipo, CONST_STR) == 0)
         {
             esValor = strcmp(valor, tablaSimbolos->data.valor.valor_str);
         }
