@@ -101,12 +101,26 @@
 
                               ;
 
-                                                            pivot
+                                                                      _valor_menor_a_1_2
 
-                                                  READ
+                                                            WRITE
+
+                                                  IF
+
+                                                                      _1
+
+                                                            <
+
+                                                                      pivot
 
                                         ;
 
-                                                            "Ingrese un valor pivot mayor o igual a 1: "
+                                                                      pivot
 
-                                                  WRITE
+                                                            READ
+
+                                                  ;
+
+                                                                      "Ingrese un valor pivot mayor o igual a 1: "
+
+                                                            WRITE

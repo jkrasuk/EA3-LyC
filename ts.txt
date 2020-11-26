@@ -1,14 +1,15 @@
 NOMBRE                                                      TIPO DATO           VALOR                                             LONGITUD       
 @resultado                                                  INT                 -                                                 -              
 _elemento_no_encontrado_1                                   CONST_STR           "Elemento no encontrado"                          22             
-_lista_vacia_2                                              CONST_STR           "Lista vacia"                                     11             
+_valor_menor_a_1_2                                          CONST_STR           "El valor debe ser >= 1"                          22             
+_lista_vacia_3                                              CONST_STR           "Lista vacia"                                     11             
 _0                                                          CONST_INT           0                                                 1              
 _1                                                          CONST_INT           1                                                 1              
 _9999                                                       CONST_INT           9999                                              4              
-_Ingrese_un_valor_pivot_mayor_o_igual_a_1____3              CONST_STR           "Ingrese un valor pivot mayor o igual a 1: "      42             
+_Ingrese_un_valor_pivot_mayor_o_igual_a_1____4              CONST_STR           "Ingrese un valor pivot mayor o igual a 1: "      42             
 pivot                                                       INT                 -                                                 -              
 _3                                                          CONST_INT           3                                                 1              
 _2                                                          CONST_INT           2                                                 1              
 _4                                                          CONST_INT           4                                                 1              
 resul                                                       INT                 -                                                 -              
-_Elemento_encontrado_en_posicion____4                       CONST_STR           "Elemento encontrado en posicion: "               33             
+_Elemento_encontrado_en_posicion____5                       CONST_STR           "Elemento encontrado en posicion: "               33             

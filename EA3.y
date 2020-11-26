@@ -96,7 +96,7 @@ char bufferNoEncontrando[10];
 char* puntBufferNoEncontrado;
 bool esValor(const char *);
 
-int  i=0, contadorString = 0, contadorId = 0, funcionPosicion = 0, branchElementoNoEncontrado=0;
+int  i=0, contadorString = 0, contadorId = 0, funcionPosicion = 0, funcionRead = 0, branchElementoNoEncontrado=0, branchPivotMenorAUno=0;
 ast * _write, * _read, *_asig, * _posicion, *_fact, *_condPosicion, *_validacionPosicion;
 ast* _pProg ,* _pSent;
 ast* _aux;
@@ -159,13 +159,16 @@ prog: prog sent {
     
     _pProg = newNode(";", _pProg, _pSent); 
     
-    if(funcionPosicion){
-
-            
+    if(funcionPosicion){          
             _pProg = newNode(";", _pProg, newNode("IF",
                 newNode("=", newLeaf(puntBufferTs), newLeaf("_9999")),
                 newNode("WRITE", NULL, newLeaf("_elemento_no_encontrado_1"))
              )); 
+    } else if (funcionRead){
+            _pProg = newNode(";", _pProg, newNode("IF",
+                newNode("<", newLeaf(puntBufferTs), newLeaf("_1")),
+                newNode("WRITE", NULL, newLeaf("_valor_menor_a_1_2"))
+             ));
     }
     
     printf("\n Regla 2 - prog: prog sent \n");}
@@ -187,6 +190,7 @@ read: READ ID {
                 _read = newNode("READ", NULL ,newLeaf(puntBufferTs));
                 printf("\n Regla 4 - read: read ID \n");
                 funcionPosicion = 0;
+                funcionRead = 1;
                 }
   ;
 
@@ -200,6 +204,7 @@ asig: ID ASIG posicion {
                           _asig = newNode("=", newLeaf(puntBufferTs) , _posicion );                                 
                           printf("\n Regla 5 - asig: ID ASIG posicion \n");
                           funcionPosicion = 1;
+                          funcionRead = 0;
                           }
   ;
 
@@ -277,14 +282,16 @@ write: WRITE CTE_STRING {
                           insertarTS(puntBufferTs, "CONST_STR", puntBufferTs, 0, 0);
                           _write = newNode("WRITE", NULL, newLeaf(puntBufferTs));
                           printf("\n Regla 10 - write: WRITE CTE_STRING \n");
-                        funcionPosicion = 0;
+                            funcionPosicion = 0;
+                            funcionRead = 0;
                           }
   | WRITE ID {
               sprintf(bufferTS,"%s", $2);
               puntBufferTs = strtok(bufferTS,";\n");
                _write = newNode("WRITE", NULL, newLeaf(puntBufferTs));
-              printf("\n Regla 11 - write: WRITE ID \n");
-                                      funcionPosicion = 0;
+                printf("\n Regla 11 - write: WRITE ID \n");
+                funcionPosicion = 0;
+                funcionRead = 0;
               }
   ;
 
@@ -301,6 +308,7 @@ int main(int argc, char *argv[])
     {
         crearTablaTS();
         insertarTS("_elemento_no_encontrado", "CONST_STR", "\"Elemento no encontrado\"", 0, 0);
+        insertarTS("_valor_menor_a_1", "CONST_STR", "\"El valor debe ser >= 1\"", 0, 0);
         insertarTS("_lista_vacia", "CONST_STR", "\"Lista vacia\"", 0, 0);
         insertarTS("_0", "CONST_INT", "", 0, 0);
         insertarTS("_1", "CONST_INT", "", 1, 0);
@@ -676,7 +684,7 @@ void recorrerArbolGraphviz(ast * arbol, FILE* pf)
         fprintf(pf," N%d [label = %s]\n",arbol->nodeId,arbol->value );
     else
     {
-        if(strcmp(arbol->value, "_elemento_no_encontrado_1") == 0){
+        if(strcmp(arbol->value, "_elemento_no_encontrado_1") == 0 || strcmp(arbol->value, "_valor_menor_a_1_2") == 0 ){
             fprintf(pf," N%d [peripheries=2; label = \"%s\"]\n",arbol->nodeId,arbol->value );
         }else{
             fprintf(pf," N%d [label = \"%s\"]\n",arbol->nodeId,arbol->value );
@@ -770,7 +778,7 @@ void generaFooter(FILE *archAssembler)
 {
     fprintf(archAssembler, "JMP FOOTER\n"); //aca para cuando no dio resultados
     fprintf(archAssembler, "branch%d:\n", branchListaVacia ); //aca para cuando no dio resultados
-    fprintf(archAssembler, "displayString _lista_vacia_2\nNEWLINE\n");
+    fprintf(archAssembler, "displayString _lista_vacia_3\nNEWLINE\n");
     fprintf(archAssembler, "FOOTER:"); //aca para cuando no dio resultados
     fprintf(archAssembler, "\n%-30s%-30s\n", "mov AX,4C00h", "; Indica que debe finalizar la ejecución");
     fprintf(archAssembler, "%s\n\n%s", "int 21h", "END inicio");
@@ -800,6 +808,11 @@ void recorrerArbol( ast * root, FILE *archAssembler)
                 fprintf(archAssembler, "JMP FOOTER\nNEWLINE\n");
                 fprintf(archAssembler, "branch%d:\n", branchN ); //aca cae si dio false
                 branchN++;  
+            } else if (branchPivotMenorAUno){
+                branchPivotMenorAUno = 0;
+                fprintf(archAssembler, "JMP FOOTER\nNEWLINE\n");
+                fprintf(archAssembler, "branch%d:\n", branchN ); //aca cae si dio false
+                branchN++;      
             }
         }
         else
@@ -854,6 +867,24 @@ void recorrerArbol( ast * root, FILE *archAssembler)
         else
         {
             generarAssemblerAsignacionSimple(root, archAssembler );
+        }
+    } else if (strcmp(root->value ,"<") == 0){
+        if(strcmp(root->right->value, "_1") == 0)
+        {
+            fprintf(archAssembler, "\n;Validacion de pivot mayor o igual a 1\n");
+            t_simbolo *lexemaI = getLexema( root->left->value );
+            fprintf(archAssembler, "fld %s\n", lexemaI->data.nombreASM);
+            fprintf(archAssembler, "fstp @ifI\n");
+            t_simbolo *lexemaD = getLexema( root->right->value );
+            fprintf(archAssembler, "fld %s\n", lexemaD->data.nombreASM);
+            fprintf(archAssembler, "fstp @ifD\n");
+            fprintf(archAssembler, "fld @ifI\n");       //carga @ifI
+            fprintf(archAssembler, "fld @ifD\n");       //carga @ifD
+            fprintf(archAssembler, "fxch\n");           //intercambia las posiciones 0 y 1
+            fprintf(archAssembler, "fcom \n");          //compara
+            fprintf(archAssembler, "fstsw AX\nsahf\n"); //no se si porque sentencia es necesaria
+            fprintf(archAssembler, "JAE branch%d\n", branchN );// si dio false, salteate lo siguiente
+            branchPivotMenorAUno = 1;
         }
     }
 
