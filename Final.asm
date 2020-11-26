@@ -35,14 +35,6 @@ NEWLINE
 GetFloat pivot
 NEWLINE
 
-;Comienza el codigo de maximo
-fld _9999
-fstp @resultado
-
-;Comienza el codigo de maximo
-fld _2
-fstp pivot
-
 ;Codigo if
 fld pivot
 fstp @ifI
@@ -59,14 +51,10 @@ fld _0
 fstp @resultado
 branch0:
 
-;Comienza el codigo de maximo
-fld _2
-fstp pivot
-
 ;Codigo if
 fld pivot
 fstp @ifI
-fld _2
+fld _3
 fstp @ifD
 fld @ifI
 fld @ifD
@@ -75,13 +63,9 @@ fcom
 fstsw AX
 sahf
 jne branch1
-fld _0
+fld _1
 fstp @resultado
 branch1:
-
-;Comienza el codigo de maximo
-fld _1
-fstp pivot
 
 ;Codigo if
 fld pivot
@@ -98,10 +82,6 @@ jne branch2
 fld _2
 fstp @resultado
 branch2:
-
-;Comienza el codigo de maximo
-fld _4
-fstp pivot
 
 ;Codigo if
 fld pivot

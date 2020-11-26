@@ -749,6 +749,8 @@ void    generarAssemblerAsignacionSimple( ast * root , FILE *archAssembler )
         fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM); //cargo el lado derecho
         lexema = getLexema( root->left->value );
         fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM ); //lo guardo en la variable del lado izquierdo
+                fprintf(archAssembler, "PIJA\n", ); //lo guardo en la variable del lado izquierdo
+
 }
 
 
@@ -758,8 +760,8 @@ void    generarAssemblerMax( ast * root , FILE *archAssembler)
         if ( strcmp(root->value,"=") == 0 )
         {
             
-            fprintf(archAssembler, "\n;Comienza el codigo de maximo\n");
-            generarAssemblerAsignacionSimple( root, archAssembler);
+            // fprintf(archAssembler, "\n;Comienza el codigo de maximo\n");
+            // generarAssemblerAsignacionSimple( root, archAssembler);
         }else{
             
             if( root->left != NULL ) {
