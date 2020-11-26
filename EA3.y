@@ -90,7 +90,7 @@ void    generarAssemblerAsignacionSimple( ast * root , FILE *archAssembler);
 
 int branchN = 0;
 int contadorConstantes = 0;
-int branchFinalizoSinResultados = 9999;
+int branchFinalizoSinResultados = -1;
 int branchListaVacia = 10000;
 char bufferNoEncontrando[10];
 char* puntBufferNoEncontrado;
@@ -161,12 +161,12 @@ prog: prog sent {
     
     if(funcionPosicion && tengoLista == 1){          
             _pProg = newNode(";", _pProg, newNode("IF",
-                newNode("=", newLeaf(puntBufferTs), newLeaf("_9999")),
+                newNode("=", newLeaf(puntBufferTs), newLeaf("_valorNoDeterminado")),
                 newNode("WRITE", NULL, newLeaf("_elemento_no_encontrado_1"))
              )); 
     }else if(funcionPosicion && tengoLista == 0){          
             _pProg = newNode(";", _pProg, newNode("IF",
-                newNode("=", newLeaf(puntBufferTs), newLeaf("_9999")),
+                newNode("=", newLeaf(puntBufferTs), newLeaf("_valorNoDeterminado")),
                 newNode("WRITE", NULL, newLeaf("_lista_vacia_3"))
              )); 
     } else if (funcionRead){
@@ -217,8 +217,8 @@ posicion:
   POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} lista CC PARC {tengoLista = 1; printf("\n Regla 6 - posicion: POSICION PARA ID PYC CA lista CC PARC \n");}
   | POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} CC PARC {
     tengoLista = 0;
-    // Agrego una hoja con el 9999
-    _posicion = newLeaf("_9999");
+    // Agrego una hoja con el -1
+    _posicion = newLeaf("_valorNoDeterminado");
 
     printf("\n Regla 6 - posicion: POSICION PARA ID PYC CA CC PARC \n");}
   ;
@@ -318,9 +318,9 @@ int main(int argc, char *argv[])
         insertarTS("_lista_vacia", "CONST_STR", "\"Lista vacia\"", 0, 0);
         insertarTS("_0", "CONST_INT", "", 0, 0);
         insertarTS("_1", "CONST_INT", "", 1, 0);
-        sprintf(bufferNoEncontrando,"_%d", 9999);
+        sprintf(bufferNoEncontrando,"_valorNoDeterminado");
         puntBufferNoEncontrado = strtok(bufferNoEncontrando,";\n");
-        insertarTS(puntBufferNoEncontrado, "CONST_INT", "", 9999, 0);
+        insertarTS(puntBufferNoEncontrado, "CONST_INT", "", -1, 0);
         yyparse();
     }
 
@@ -521,12 +521,20 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
         }
         if(strcmp(tipo, "CONST_INT") == 0)
         {
-            sprintf(aux, "%d", valInt);
-            strcat(full, aux);
+            if(valInt == -1){
+                sprintf(aux, "%s", "valorNoDeterminado");
+                strcat(full, aux);
+            } else {
+                sprintf(aux, "%d", valInt);
+                strcat(full, aux);
+            }
             data->nombre = (char*)malloc(sizeof(char) * (strlen(full) + 1));
             strcpy(data->nombre, full);
             data->valor.valor_int = valInt;
+
+
             data->nombreASM = (char*)malloc(sizeof(char) * (strlen(full) + 1));
+
             strcpy(data->nombreASM, full);
         }
         return data;
@@ -740,39 +748,39 @@ void crearSeccionData(FILE *archAssembler)
         if(strcmp(aux->data.tipo, "INT") == 0)
         {
             //sprintf(linea, "%-35s%-30s%-30s%-d\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
-            fprintf(archAssembler, "%-15s%-15s%-15s\n", aux->data.nombre, "dd", "?");
+            fprintf(archAssembler, "%-50s%-15s%-15s\n", aux->data.nombre, "dd", "?");
         }
         else if(strcmp(aux->data.tipo, "FLOAT") == 0)
         {
-            fprintf(archAssembler, "%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", "?");
+            fprintf(archAssembler, "%-50s%-15s%-15s\n", aux->data.nombreASM, "dd", "?");
         }
         else if(strcmp(aux->data.tipo, "STRING") == 0)
         {
-            fprintf(archAssembler, "%-15s%-15s%-15s\n", aux->data.nombreASM, "db", "?");
+            fprintf(archAssembler, "%-50s%-15s%-15s\n", aux->data.nombreASM, "db", "?");
         }
         else if(strcmp(aux->data.tipo, "CONST_INT") == 0)
         {
             char valor[50];
             sprintf(valor, "%d.0", aux->data.valor.valor_int);
-            fprintf(archAssembler, "%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", valor);
+            fprintf(archAssembler, "%-50s%-15s%-15s\n", aux->data.nombreASM, "dd", valor);
         }
         else if(strcmp(aux->data.tipo, "CONST_REAL") == 0)
         {
             char valor[50];
             sprintf(valor, "%g", aux->data.valor.valor_double);
-            fprintf(archAssembler, "%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", valor);
+            fprintf(archAssembler, "%-50s%-15s%-15s\n", aux->data.nombreASM, "dd", valor);
         }
         else if(strcmp(aux->data.tipo, "CONST_STR") == 0)
         {
             char valor[200];
             sprintf(valor, "%s, '$', %d dup (?)",aux->data.valor.valor_str, strlen(aux->data.valor.valor_str) - 2);
-            fprintf(archAssembler, "%-60s%-15s%-15s\n", aux->data.nombreASM, "db", valor);
+            fprintf(archAssembler, "%-50s%-15s%-15s\n", aux->data.nombreASM, "db", valor);
         }
         //fprintf(archAssembler, "%s", linea);
         //free(aux);
     }
-    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@ifI", "dd", "?", "; Variable para condición izquierda");
-    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@ifD", "dd", "?", "; Variable para condición derecha");
+    fprintf(archAssembler, "%-50s%-15s%-15s%-15s\n", "@ifI", "dd", "?", "; Variable para condición izquierda");
+    fprintf(archAssembler, "%-50s%-15s%-15s%-15s\n", "@ifD", "dd", "?", "; Variable para condición derecha");
 }
 void crearSeccionCode(FILE *archAssembler)
 {
@@ -782,9 +790,6 @@ void crearSeccionCode(FILE *archAssembler)
 }
 void generaFooter(FILE *archAssembler)
 {
-    fprintf(archAssembler, "JMP FOOTER\n"); //aca para cuando no dio resultados
-    fprintf(archAssembler, "branch%d:\n", branchListaVacia ); //aca para cuando no dio resultados
-    fprintf(archAssembler, "displayString _lista_vacia_3\nNEWLINE\n");
     fprintf(archAssembler, "FOOTER:"); //aca para cuando no dio resultados
     fprintf(archAssembler, "\n%-30s%-30s\n", "mov AX,4C00h", "; Indica que debe finalizar la ejecución");
     fprintf(archAssembler, "%s\n\n%s", "int 21h", "END inicio");
@@ -840,7 +845,7 @@ void recorrerArbol( ast * root, FILE *archAssembler)
         fueAsignacion = true;
 
 
-        if(strcmp(root->right->value, "_9999") == 0)
+        if(strcmp(root->right->value, "_valorNoDeterminado") == 0)
         {
             fprintf(archAssembler, "\n;Validacion de elemento no encontrado\n");
             t_simbolo *lexemaI = getLexema( root->left->value );
@@ -921,7 +926,7 @@ void    generarAssemblerMax( ast * root, FILE *archAssembler)
 
     if ( strcmp(root->value,"=") == 0 )
     {
-        if(strcmp(root->right->value,"_9999") == 0){
+        if(strcmp(root->right->value,"_valorNoDeterminado") == 0){
             fprintf(archAssembler, "\n;Comienza el codigo de posicion\n");
             generarAssemblerAsignacionSimple( root, archAssembler);
         }
