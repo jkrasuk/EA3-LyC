@@ -162,17 +162,17 @@ prog: prog sent {
     if(funcionPosicion && tengoLista == 1){          
             _pProg = newNode(";", _pProg, newNode("IF",
                 newNode("=", newLeaf(puntBufferTs), newLeaf("_valorNoDeterminado")),
-                newNode("WRITE", NULL, newLeaf("_elemento_no_encontrado_1"))
+                newNode("WRITE", NULL, newLeaf("\"Elemento no encontrado\""))
              )); 
     }else if(funcionPosicion && tengoLista == 0){          
             _pProg = newNode(";", _pProg, newNode("IF",
                 newNode("=", newLeaf(puntBufferTs), newLeaf("_valorNoDeterminado")),
-                newNode("WRITE", NULL, newLeaf("_lista_vacia_3"))
+                newNode("WRITE", NULL, newLeaf("\"Lista vacia\""))
              )); 
     } else if (funcionRead){
             _pProg = newNode(";", _pProg, newNode("IF",
                 newNode("<", newLeaf(puntBufferTs), newLeaf("_1")),
-                newNode("WRITE", NULL, newLeaf("_valor_menor_a_1_2"))
+                newNode("WRITE", NULL, newLeaf("\"El valor debe ser >= 1\""))
              ));
     }
     
@@ -695,14 +695,14 @@ void recorrerArbolGraphviz(ast * arbol, FILE* pf)
 
 
     if(strchr(arbol->value,'\"'))
+     if(strcmp(arbol->value, "\"Elemento no encontrado\"") == 0 || strcmp(arbol->value, "\"El valor debe ser >= 1\"") == 0  || strcmp(arbol->value, "\"Lista vacia\"") == 0 ){
+        fprintf(pf," N%d [peripheries=2; label = %s]\n",arbol->nodeId,arbol->value );
+     } else {
         fprintf(pf," N%d [label = %s]\n",arbol->nodeId,arbol->value );
+    }
     else
     {
-        if(strcmp(arbol->value, "_elemento_no_encontrado_1") == 0 || strcmp(arbol->value, "_valor_menor_a_1_2") == 0  || strcmp(arbol->value, "_lista_vacia_3") == 0 ){
-            fprintf(pf," N%d [peripheries=2; label = \"%s\"]\n",arbol->nodeId,arbol->value );
-        }else{
-            fprintf(pf," N%d [label = \"%s\"]\n",arbol->nodeId,arbol->value );
-        }
+        fprintf(pf," N%d [label = \"%s\"]\n",arbol->nodeId,arbol->value );
     }
 }
 // FIN Seccion de codigo para Arbol

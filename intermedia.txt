@@ -11,7 +11,7 @@
 
           ;
 
-                                                  _elemento_no_encontrado_1
+                                                  "Elemento no encontrado"
 
                                         WRITE
 
@@ -101,7 +101,7 @@
 
                               ;
 
-                                                                      _valor_menor_a_1_2
+                                                                      "El valor debe ser >= 1"
 
                                                             WRITE
 
