@@ -11,10 +11,10 @@ include number.asm
 @resultado     dd             ?              
 _Ingrese_un_valor_pivot_mayor_o_igual_a_1____1              db             "Ingrese un valor pivot mayor o igual a 1: ", '$', 42 dup (?)
 pivot          dd             ?              
+_1             dd             1.0            
 _9999          dd             9999.0         
 _0             dd             0.0            
 _2             dd             2.0            
-_1             dd             1.0            
 _3             dd             3.0            
 _4             dd             4.0            
 resul          dd             ?              
@@ -48,6 +48,8 @@ fstsw AX
 sahf
 jne branch0
 fld _0
+fld _1
+FADD
 fstp @resultado
 branch0:
 
@@ -64,6 +66,8 @@ fstsw AX
 sahf
 jne branch1
 fld _1
+fld _1
+FADD
 fstp @resultado
 branch1:
 
@@ -80,6 +84,8 @@ fstsw AX
 sahf
 jne branch2
 fld _2
+fld _1
+FADD
 fstp @resultado
 branch2:
 
@@ -96,6 +102,8 @@ fstsw AX
 sahf
 jne branch3
 fld _3
+fld _1
+FADD
 fstp @resultado
 branch3:
 fld @resultado

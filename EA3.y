@@ -191,6 +191,8 @@ posicion: POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBuff
   ;
 
 lista: CTE_INT {
+                insertarTS("_1", "CONST_INT", "", 1, 0);
+
                 indicePosicion = 0;
                 sprintf(bufferTS,"%d", $1);
                 puntBufferTs = strtok(bufferTS,";\n");
@@ -358,13 +360,10 @@ int insertarTS(const char *nombre, const char *tipo, const char* valString, int 
             }
       } else if(strcmp(tabla->data.tipo, "CONST_INT") == 0 && strcmp(tipo, "CONST_INT") == 0 )
         {
-                                      printf("\n Tengo %s", nombre);
 
-                            printf("\n Tengo %d y %d", tabla->data.valor.valor_int,valInt);
 if(tabla->data.valor.valor_int == valInt){
   return 1;
 }
-                printf("\n Voy a crear %d", valInt);
 
       }
         
@@ -374,7 +373,6 @@ if(tabla->data.valor.valor_int == valInt){
         }
         tabla = tabla->next;
     }
-    printf("\n Voy a crear %d", valInt);
     t_data *data = (t_data*) malloc(sizeof(t_data));
     data = crearDatos(nombre, tipo, valString, valInt, valDouble);
 
@@ -747,9 +745,10 @@ void    generarAssemblerAsignacionSimple( ast * root , FILE *archAssembler )
 {
         t_simbolo *lexema = getLexema( root->right->value );
         fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM); //cargo el lado derecho
+        fprintf(archAssembler, "fld _1\n"); //cargo el lado derecho        
+        fprintf(archAssembler, "FADD\n"); //Sumo
         lexema = getLexema( root->left->value );
         fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM ); //lo guardo en la variable del lado izquierdo
-                fprintf(archAssembler, "PIJA\n", ); //lo guardo en la variable del lado izquierdo
 
 }
 
