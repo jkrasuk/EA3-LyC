@@ -96,7 +96,7 @@ char bufferNoEncontrando[10];
 char* puntBufferNoEncontrado;
 bool esValor(const char *);
 
-int  i=0, contadorString = 0, contadorId = 0, funcionPosicion = 0, funcionRead = 0, branchElementoNoEncontrado=0, branchPivotMenorAUno=0;
+int  i=0, contadorString = 0, contadorId = 0, funcionPosicion = 0, funcionRead = 0, branchElementoNoEncontrado=0, branchPivotMenorAUno=0, tengoLista=0;
 ast * _write, * _read, *_asig, * _posicion, *_fact, *_condPosicion, *_validacionPosicion;
 ast* _pProg ,* _pSent;
 ast* _aux;
@@ -159,10 +159,15 @@ prog: prog sent {
     
     _pProg = newNode(";", _pProg, _pSent); 
     
-    if(funcionPosicion){          
+    if(funcionPosicion && tengoLista == 1){          
             _pProg = newNode(";", _pProg, newNode("IF",
                 newNode("=", newLeaf(puntBufferTs), newLeaf("_9999")),
                 newNode("WRITE", NULL, newLeaf("_elemento_no_encontrado_1"))
+             )); 
+    }else if(funcionPosicion && tengoLista == 0){          
+            _pProg = newNode(";", _pProg, newNode("IF",
+                newNode("=", newLeaf(puntBufferTs), newLeaf("_9999")),
+                newNode("WRITE", NULL, newLeaf("_lista_vacia_3"))
              )); 
     } else if (funcionRead){
             _pProg = newNode(";", _pProg, newNode("IF",
@@ -209,10 +214,11 @@ asig: ID ASIG posicion {
   ;
 
 posicion: 
-  POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} lista CC PARC {printf("\n Regla 6 - posicion: POSICION PARA ID PYC CA lista CC PARC \n");}
+  POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} lista CC PARC {tengoLista = 1; printf("\n Regla 6 - posicion: POSICION PARA ID PYC CA lista CC PARC \n");}
   | POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} CC PARC {
-    // Agrego una hoja con el 0
-    _posicion = newLeaf("_0");
+    tengoLista = 0;
+    // Agrego una hoja con el 9999
+    _posicion = newLeaf("_9999");
 
     printf("\n Regla 6 - posicion: POSICION PARA ID PYC CA CC PARC \n");}
   ;
@@ -684,7 +690,7 @@ void recorrerArbolGraphviz(ast * arbol, FILE* pf)
         fprintf(pf," N%d [label = %s]\n",arbol->nodeId,arbol->value );
     else
     {
-        if(strcmp(arbol->value, "_elemento_no_encontrado_1") == 0 || strcmp(arbol->value, "_valor_menor_a_1_2") == 0 ){
+        if(strcmp(arbol->value, "_elemento_no_encontrado_1") == 0 || strcmp(arbol->value, "_valor_menor_a_1_2") == 0  || strcmp(arbol->value, "_lista_vacia_3") == 0 ){
             fprintf(pf," N%d [peripheries=2; label = \"%s\"]\n",arbol->nodeId,arbol->value );
         }else{
             fprintf(pf," N%d [label = \"%s\"]\n",arbol->nodeId,arbol->value );
