@@ -1,0 +1,127 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdbool.h>
+
+typedef struct treeNode
+{
+    char *value;
+    int nodeId;
+    struct treeNode *left;
+    struct treeNode *right;
+} ast;
+
+ast *newNode();
+ast *newLeaf();
+void print2DUtil(ast *root, int space);
+void print2D(ast *root);
+void generarGraphviz(ast *arbol);
+void recorrerArbolGraphviz(ast *arbol, FILE *pf);
+
+int contadorId = 0;
+FILE *intermedia;
+
+ast *newNode(char *operation, ast *leftNode, ast *rightNode)
+{
+    ast *node = (ast *)malloc(sizeof(ast));
+    node->value = operation;
+    node->nodeId = contadorId;
+    node->left = leftNode;
+    node->right = rightNode;
+    contadorId++;
+    return node;
+}
+
+ast *newLeaf(char *value)
+{
+    ast *node = (ast *)malloc(sizeof(ast));
+    node->nodeId = contadorId;
+    node->value = strdup(value);
+    node->left = NULL;
+    node->right = NULL;
+    contadorId++;
+    return node;
+}
+
+void print2DUtil(ast *root, int space)
+{
+
+    // Base case
+    if (root == NULL)
+        return;
+
+    // Increase distance between levels
+    space += 10;
+
+    // Process right child first
+    print2DUtil(root->right, space);
+
+    // Print current node after space
+    fprintf(intermedia, "\n");
+    int i;
+    for (i = 10; i < space; i++)
+        fprintf(intermedia, " ");
+    fprintf(intermedia, "%s\n", root->value);
+
+    // Process left child
+    print2DUtil(root->left, space);
+}
+
+// Wrapper over print2DUtil()
+void print2D(ast *root)
+{
+    intermedia = fopen("intermedia.txt", "w");
+    if (intermedia == NULL)
+    {
+        printf("No se pudo crear el archivo intermedia.txt\n");
+        exit(1);
+    }
+    // Pass initial space count as 0
+    print2DUtil(root, 0);
+    fclose(intermedia);
+}
+
+void generarGraphviz(ast *arbol)
+{
+    FILE *pf = fopen("intermedia.gv", "w+");
+    fprintf(pf, "digraph G {\n");
+    fprintf(pf, "\tnode [fontname = \"Arial\"];\n");
+    recorrerArbolGraphviz(arbol, pf);
+    fprintf(pf, "}");
+    fclose(pf);
+}
+
+void recorrerArbolGraphviz(ast *arbol, FILE *pf)
+{
+    if (arbol == NULL)
+        return;
+
+    //printf( "%s\t%d\n", arbol->value , arbol->nodeId );
+
+    if (arbol->left)
+    {
+        fprintf(pf, " N%d -> N%d; \n", arbol->nodeId, arbol->left->nodeId);
+        recorrerArbolGraphviz(arbol->left, pf);
+    }
+
+    if (arbol->right)
+    {
+        fprintf(pf, " N%d -> N%d; \n", arbol->nodeId, arbol->right->nodeId);
+        recorrerArbolGraphviz(arbol->right, pf);
+    }
+
+    if (strchr(arbol->value, '\"'))
+        if (strcmp(arbol->value, "\"Elemento no encontrado\"") == 0 || strcmp(arbol->value, "\"El valor debe ser >= 1\"") == 0 || strcmp(arbol->value, "\"Lista vacia\"") == 0)
+        {
+            fprintf(pf, " N%d [peripheries=2; label = %s]\n", arbol->nodeId, arbol->value);
+        }
+        else
+        {
+            fprintf(pf, " N%d [label = %s]\n", arbol->nodeId, arbol->value);
+        }
+    else
+    {
+        fprintf(pf, " N%d [label = \"%s\"]\n", arbol->nodeId, arbol->value);
+    }
+}
