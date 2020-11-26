@@ -797,6 +797,7 @@ void generaFooter(FILE *archAssembler)
 void recorrerArbol( ast * root, FILE *archAssembler)
 {
     bool fueAsignacion = false;
+    bool fueValidacionListaVacia = false;
     //printf( "%s\t", root->value);
 
     if ( root->left != NULL )
@@ -806,7 +807,14 @@ void recorrerArbol( ast * root, FILE *archAssembler)
 
     if ( (strcmp(root->value,";") == 0 ) )
     {
-        //aca no pasa nada
+      if(root->right && root->right->right && root->right->right->value && strcmp(root->right->right->value, puntBufferNoEncontrado) == 0){
+        fueValidacionListaVacia = true;
+        t_simbolo *lexema = getLexema( root->right->right->value );
+
+        fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM); //cargo el lado derecho
+        lexema = getLexema( root->right->left->value );
+        fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM ); //lo guardo en la variable del lado izquierdo
+      }
     }
     else if ( strcmp(root->value,"WRITE") == 0 )
     {
@@ -901,7 +909,7 @@ void recorrerArbol( ast * root, FILE *archAssembler)
 
 
 
-    if( (root->right != NULL) && !(fueAsignacion) )
+    if( (root->right != NULL) && !(fueAsignacion) && !(fueValidacionListaVacia))
     {
         recorrerArbol(root->right, archAssembler);
     }
@@ -910,20 +918,15 @@ void    generarAssemblerAsignacionSimple( ast * root, FILE *archAssembler )
 {
     t_simbolo *lexema = getLexema( root->right->value );
 
-    if(contadorConstantes == 0){
-              fprintf(archAssembler, "je branch%d\n", branchListaVacia );// si dio false, salteate lo siguiente
-    }else{
 
       fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM); //cargo el lado derecho
       lexema = getLexema( root->left->value );
       fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM ); //lo guardo en la variable del lado izquierdo
-    }
 }
 
 
 void    generarAssemblerMax( ast * root, FILE *archAssembler)
 {
-
     if ( strcmp(root->value,"=") == 0 )
     {
         if(strcmp(root->right->value,"_valorNoDeterminado") == 0){
@@ -938,7 +941,7 @@ void    generarAssemblerMax( ast * root, FILE *archAssembler)
         {
             generarAssemblerMax( root->left, archAssembler);
         }
-        if( strcmp(root->value,"IF") == 0  )
+        if( strcmp(root->value,"IF") == 0)
         {
             fprintf(archAssembler, "\n;Codigo if\n");
             // printf("izq izq es %s", root->left->left->value  );

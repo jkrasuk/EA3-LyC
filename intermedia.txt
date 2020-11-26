@@ -11,7 +11,7 @@
 
           ;
 
-                                                  _lista_vacia_3
+                                                  _elemento_no_encontrado_1
 
                                         WRITE
 
@@ -25,7 +25,75 @@
 
                     ;
 
-                                                  _valorNoDeterminado
+                                                                                3
+
+                                                                      =
+
+                                                                                @resultado
+
+                                                            IF
+
+                                                                                4
+
+                                                                      =
+
+                                                                                pivot
+
+                                                  ;
+
+                                                                                          2
+
+                                                                                =
+
+                                                                                          @resultado
+
+                                                                      IF
+
+                                                                                          1
+
+                                                                                =
+
+                                                                                          pivot
+
+                                                            ;
+
+                                                                                                    1
+
+                                                                                          =
+
+                                                                                                    @resultado
+
+                                                                                IF
+
+                                                                                                    2
+
+                                                                                          =
+
+                                                                                                    pivot
+
+                                                                      ;
+
+                                                                                                              0
+
+                                                                                                    =
+
+                                                                                                              @resultado
+
+                                                                                          IF
+
+                                                                                                              3
+
+                                                                                                    =
+
+                                                                                                              pivot
+
+                                                                                ;
+
+                                                                                                    _valorNoDeterminado
+
+                                                                                          =
+
+                                                                                                    @resultado
 
                                         =
 
