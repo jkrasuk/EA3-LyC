@@ -10,7 +10,8 @@ include number.asm
 
 @resultado     dd             ?              
 _elemento_no_encontrado_1                                   db             "Elemento no encontrado", '$', 22 dup (?)
-_Ingrese_un_valor_pivot_mayor_o_igual_a_1____2              db             "Ingrese un valor pivot mayor o igual a 1: ", '$', 42 dup (?)
+_lista_vacia_2                                              db             "Lista vacia", '$', 11 dup (?)
+_Ingrese_un_valor_pivot_mayor_o_igual_a_1____3              db             "Ingrese un valor pivot mayor o igual a 1: ", '$', 42 dup (?)
 pivot          dd             ?              
 _1             dd             1.0            
 _0             dd             0.0            
@@ -19,7 +20,7 @@ _2             dd             2.0
 _3             dd             3.0            
 _4             dd             4.0            
 resul          dd             ?              
-_Elemento_encontrado_en_posicion____3                       db             "Elemento encontrado en posicion: ", '$', 33 dup (?)
+_Elemento_encontrado_en_posicion____4                       db             "Elemento encontrado en posicion: ", '$', 33 dup (?)
 @ifI           dd             ?              ; Variable para condición izquierda
 @ifD           dd             ?              ; Variable para condición derecha
 
@@ -31,7 +32,7 @@ mov AX,@DATA                  ; Inicializa el segmento de datos
 mov DS,AX                     
 mov ES,AX                     
 
-displayString _Ingrese_un_valor_pivot_mayor_o_igual_a_1____2
+displayString _Ingrese_un_valor_pivot_mayor_o_igual_a_1____3
 NEWLINE
 GetFloat pivot
 NEWLINE
@@ -115,13 +116,17 @@ sahf
 je branch9999
 fld @resultado
 fstp resul
-displayString _Elemento_encontrado_en_posicion____3
+displayString _Elemento_encontrado_en_posicion____4
 NEWLINE
 DisplayFloat resul,1
 NEWLINE
 JMP FOOTER
 branch9999:
 displayString _elemento_no_encontrado_1
+NEWLINE
+JMP FOOTER
+branch10000:
+displayString _lista_vacia_2
 NEWLINE
 FOOTER:
 mov AX,4C00h                  ; Indica que debe finalizar la ejecución

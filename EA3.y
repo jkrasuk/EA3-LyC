@@ -189,10 +189,9 @@ asig: ID ASIG posicion {
 
 posicion: POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} lista CC PARC {printf("\n Regla 6 - posicion: POSICION PARA ID PYC CA lista CC PARC \n");}
   | POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} CC PARC {
-    sprintf(bufferNoEncontrando,"%s", "Lista vacia");
-    puntBufferNoEncontrado = strtok(bufferNoEncontrando,";\n");
-    _condPosicion = newNode("=", newLeaf("@resultado") , newLeaf( puntBufferNoEncontrado ));
-    _posicion = newNode(";", _posicion , _condPosicion );
+    insertarTS("_0", "CONST_INT", "", 0, 0);
+
+    _posicion = newLeaf("_0");
     printf("\n Regla 6 - posicion: POSICION PARA ID PYC CA CC PARC \n");}
   ;
 
@@ -725,7 +724,7 @@ void generaFooter(FILE *archAssembler)
     fprintf(archAssembler, "displayString _elemento_no_encontrado_1\nNEWLINE\n");
     fprintf(archAssembler, "JMP FOOTER\n"); //aca para cuando no dio resultados
     fprintf(archAssembler, "branch%d:\n", branchListaVacia ); //aca para cuando no dio resultados
-    fprintf(archAssembler, "displayString _lista_vacia_1\nNEWLINE\n");
+    fprintf(archAssembler, "displayString _lista_vacia_2\nNEWLINE\n");
     fprintf(archAssembler, "FOOTER:"); //aca para cuando no dio resultados
     fprintf(archAssembler, "\n%-30s%-30s\n", "mov AX,4C00h", "; Indica que debe finalizar la ejecución");
     fprintf(archAssembler, "%s\n\n%s", "int 21h", "END inicio");
@@ -794,12 +793,16 @@ void recorrerArbol( ast * root, FILE *archAssembler)
 void    generarAssemblerAsignacionSimple( ast * root, FILE *archAssembler )
 {
     t_simbolo *lexema = getLexema( root->right->value );
-    fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM); //cargo el lado derecho
-    fprintf(archAssembler, "fld _1\n"); //cargo el lado derecho
-    fprintf(archAssembler, "FADD\n"); //Sumo
-    lexema = getLexema( root->left->value );
-    fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM ); //lo guardo en la variable del lado izquierdo
 
+    if(contadorConstantes == 0){
+              fprintf(archAssembler, "je branch%d\n", branchListaVacia );// si dio false, salteate lo siguiente
+    }else{
+      fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM); //cargo el lado derecho
+      fprintf(archAssembler, "fld _1\n"); //cargo el lado derecho
+      fprintf(archAssembler, "FADD\n"); //Sumo
+      lexema = getLexema( root->left->value );
+      fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM ); //lo guardo en la variable del lado izquierdo
+    }
 }
 
 
