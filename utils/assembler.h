@@ -54,7 +54,7 @@ void recorrerArbol(ast *root, FILE *archAssembler)
 
     if ((strcmp(root->value, PUNTO_Y_COMA) == 0))
     {
-        // Caso utilizado 
+        // Caso utilizado
         if (root->right && root->right->right && root->right->right->value && strcmp(root->right->right->value, VALOR_NO_DETERMINADO) == 0)
         {
             fueValidacionListaVacia = true;
@@ -123,7 +123,6 @@ void recorrerArbol(ast *root, FILE *archAssembler)
         }
         else if (strcmp(root->right->value, "=") == 0)
         {
-            //cuando el maximo contiene un solo elemento es mas facil poner el codigo aca que llamar a las otras funciones.
             t_simbolo *lexema = getLexema(root->right->right->value);
             fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM); //cargo el lado derecho
             lexema = getLexema(root->left->value);
@@ -176,7 +175,7 @@ void generarAssemblerAsignacionSimple(ast *root, FILE *archAssembler)
     fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM); //lo guardo en la variable del lado izquierdo
 }
 
-void generarAssemblerMax(ast *root, FILE *archAssembler)
+void generarAssemblerPosicion(ast *root, FILE *archAssembler)
 {
     if (strcmp(root->value, "=") == 0)
     {
@@ -191,7 +190,7 @@ void generarAssemblerMax(ast *root, FILE *archAssembler)
 
         if (root->left != NULL)
         {
-            generarAssemblerMax(root->left, archAssembler);
+            generarAssemblerPosicion(root->left, archAssembler);
         }
         if (strcmp(root->value, IF) == 0)
         {
@@ -216,7 +215,7 @@ void generarAssemblerMax(ast *root, FILE *archAssembler)
         }
         else if (root->right != NULL)
         {
-            generarAssemblerMax(root->right, archAssembler);
+            generarAssemblerPosicion(root->right, archAssembler);
         }
     }
 }
@@ -269,7 +268,7 @@ void crearSeccionData(FILE *archAssembler, t_tabla *tablaTS)
 
 void generarAssemblerAsignacion(ast *root, FILE *archAssembler)
 {
-    generarAssemblerMax(root, archAssembler);
+    generarAssemblerPosicion(root, archAssembler);
     fprintf(archAssembler, "fld @resultado\n");
 }
 

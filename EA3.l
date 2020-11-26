@@ -60,7 +60,7 @@ void validarLimitesConstanteInt()
 	int entero;
     sscanf(yytext,"%d",&entero);
 
-	if(!(entero >= -32768 && entero <= 32767)){
+	if(!(entero >= 1 && entero <= 32767)){
 		printf("Valor maximo excedido en linea %d\n", yylineno);
 		exit(1);
 	}
