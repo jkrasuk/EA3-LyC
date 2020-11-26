@@ -159,12 +159,12 @@ prog: prog sent {
     
     _pProg = newNode(";", _pProg, _pSent); 
     
-    if(funcionPosicion && tengoLista == 1){          
+    if(funcionPosicion && tengoLista){          
             _pProg = newNode(";", _pProg, newNode("IF",
                 newNode("=", newLeaf(puntBufferTs), newLeaf("_valorNoDeterminado")),
                 newNode("WRITE", NULL, newLeaf("\"Elemento no encontrado\""))
              )); 
-    }else if(funcionPosicion && tengoLista == 0){          
+    }else if(funcionPosicion && !tengoLista){          
             _pProg = newNode(";", _pProg, newNode("IF",
                 newNode("=", newLeaf(puntBufferTs), newLeaf("_valorNoDeterminado")),
                 newNode("WRITE", NULL, newLeaf("\"Lista vacia\""))
