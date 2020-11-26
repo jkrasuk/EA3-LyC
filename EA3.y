@@ -69,19 +69,18 @@ prog: prog sent {
         {
             _nodoMensajeValidacion = newNode("WRITE", NULL, newLeaf("\"Lista vacia\""));
         }
+
+        _pProg = newNode(";", _pProg, newNode("IF", _nodoComprobacionValidacion, _nodoMensajeValidacion));
     }
     else if(funcionRead)
     {
         _nodoComprobacionValidacion = newNode("<", newLeaf(puntBufferTs), newLeaf("_1"));
         _nodoMensajeValidacion = newNode("WRITE", NULL, newLeaf("\"El valor debe ser >= 1\""));
-    }
-
-    if(funcionPosicion || funcionRead)
-    {
         _pProg = newNode(";", _pProg, newNode("IF", _nodoComprobacionValidacion, _nodoMensajeValidacion));
     }
 
-    printf("\n Regla 2 - prog: prog sent \n");}
+    printf("\n Regla 2 - prog: prog sent \n");
+    }
   | sent {_pProg = _pSent; printf("\n Regla 1 - prog: sent \n");}
   ;
 
@@ -183,18 +182,18 @@ lista: CTE_INT {
   ;
 
 write: WRITE CTE_STRING {
-                          sprintf(bufferTS,"%s", $2);
-                          puntBufferTs = strtok(bufferTS,";\n");
-                          insertarTS(puntBufferTs, "CONST_STR", puntBufferTs, 0, 0);
-                          _write = newNode("WRITE", NULL, newLeaf(puntBufferTs));
-                          printf("\n Regla 10 - write: WRITE CTE_STRING \n");
+                            sprintf(bufferTS,"%s", $2);
+                            puntBufferTs = strtok(bufferTS,";\n");
+                            insertarTS(puntBufferTs, "CONST_STR", puntBufferTs, 0, 0);
+                            _write = newNode("WRITE", NULL, newLeaf(puntBufferTs));
+                            printf("\n Regla 10 - write: WRITE CTE_STRING \n");
                             funcionPosicion = 0;
                             funcionRead = 0;
                           }
   | WRITE ID {
-              sprintf(bufferTS,"%s", $2);
-              puntBufferTs = strtok(bufferTS,";\n");
-               _write = newNode("WRITE", NULL, newLeaf(puntBufferTs));
+                sprintf(bufferTS,"%s", $2);
+                puntBufferTs = strtok(bufferTS,";\n");
+                _write = newNode("WRITE", NULL, newLeaf(puntBufferTs));
                 printf("\n Regla 11 - write: WRITE ID \n");
                 funcionPosicion = 0;
                 funcionRead = 0;
@@ -205,7 +204,6 @@ write: WRITE CTE_STRING {
 
 int main(int argc, char *argv[])
 {
-
     if ((yyin = fopen(argv[1], "rt")) == NULL)
     {
         printf("\nNo se puede abrir el archivo: %s\n", argv[1]);
