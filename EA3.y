@@ -675,7 +675,13 @@ void recorrerArbolGraphviz(ast * arbol, FILE* pf)
     if(strchr(arbol->value,'\"'))
         fprintf(pf," N%d [label = %s]\n",arbol->nodeId,arbol->value );
     else
-        fprintf(pf," N%d [label = \"%s\"]\n",arbol->nodeId,arbol->value );
+    {
+        if(strcmp(arbol->value, "_elemento_no_encontrado_1") == 0){
+            fprintf(pf," N%d [peripheries=2; label = \"%s\"]\n",arbol->nodeId,arbol->value );
+        }else{
+            fprintf(pf," N%d [label = \"%s\"]\n",arbol->nodeId,arbol->value );
+        }
+    }
 }
 // FIN Seccion de codigo para Arbol
 
