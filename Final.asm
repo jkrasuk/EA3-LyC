@@ -8,22 +8,22 @@ include number.asm
 
 .DATA
 
-@resultado     dd             ?              
-_elemento_no_encontrado_1                                   db             "Elemento no encontrado", '$', 22 dup (?)
-_valor_menor_a_1_2                                          db             "El valor debe ser >= 1", '$', 22 dup (?)
-_lista_vacia_3                                              db             "Lista vacia", '$', 11 dup (?)
-_0             dd             0.0            
-_1             dd             1.0            
-_9999          dd             9999.0         
-_Ingrese_un_valor_pivot_mayor_o_igual_a_1____4              db             "Ingrese un valor pivot mayor o igual a 1: ", '$', 42 dup (?)
-pivot          dd             ?              
-_3             dd             3.0            
-_2             dd             2.0            
-_4             dd             4.0            
-resul          dd             ?              
-_Elemento_encontrado_en_posicion____5                       db             "Elemento encontrado en posicion: ", '$', 33 dup (?)
-@ifI           dd             ?              ; Variable para condición izquierda
-@ifD           dd             ?              ; Variable para condición derecha
+@resultado                                        dd             ?              
+_elemento_no_encontrado_1                         db             "Elemento no encontrado", '$', 22 dup (?)
+_valor_menor_a_1_2                                db             "El valor debe ser >= 1", '$', 22 dup (?)
+_lista_vacia_3                                    db             "Lista vacia", '$', 11 dup (?)
+_0                                                dd             0.0            
+_1                                                dd             1.0            
+_valorNoDeterminado                               dd             -1.0           
+_Ingrese_un_valor_pivot_mayor_o_igual_a_1____4    db             "Ingrese un valor pivot mayor o igual a 1: ", '$', 42 dup (?)
+pivot                                             dd             ?              
+_3                                                dd             3.0            
+_2                                                dd             2.0            
+_4                                                dd             4.0            
+resul                                             dd             ?              
+_Elemento_encontrado_en_posicion____5             db             "Elemento encontrado en posicion: ", '$', 33 dup (?)
+@ifI                                              dd             ?              ; Variable para condición izquierda
+@ifD                                              dd             ?              ; Variable para condición derecha
 
 .CODE
 
@@ -57,7 +57,7 @@ NEWLINE
 branch0:
 
 ;Comienza el codigo de posicion
-fld _9999
+fld _valorNoDeterminado
 fstp @resultado
 
 ;Codigo if
@@ -129,7 +129,7 @@ fstp resul
 ;Validacion de elemento no encontrado
 fld resul
 fstp @ifI
-fld _9999
+fld _valorNoDeterminado
 fstp @ifD
 fld @ifI
 fld @ifD
@@ -150,10 +150,6 @@ fld _1
 FADD
 fstp resul
 DisplayFloat resul,1
-NEWLINE
-JMP FOOTER
-branch10000:
-displayString _lista_vacia_3
 NEWLINE
 FOOTER:
 mov AX,4C00h                  ; Indica que debe finalizar la ejecución

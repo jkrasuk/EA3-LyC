@@ -17,7 +17,7 @@
 
                               IF
 
-                                                  _9999
+                                                  _valorNoDeterminado
 
                                         =
 
@@ -89,7 +89,7 @@
 
                                                                                 ;
 
-                                                                                                    _9999
+                                                                                                    _valorNoDeterminado
 
                                                                                           =
 
