@@ -34,147 +34,129 @@ _Elemento_encontrado_en_posicion____5             db             "Elemento encon
 
 inicio:
 
-mov AX,@DATA                  ; Inicializa el segmento de datos
-mov DS,AX                     
-mov ES,AX                     
+MOV AX,@DATA                  
+MOV DS,AX                     
+MOV ES,AX                     
 
 displayString _Ingrese_un_valor_pivot_mayor_o_igual_a_1____4
 NEWLINE
 GetFloat pivot
 NEWLINE
-
-;Validacion de pivot mayor o igual a 1
-fld pivot
-fstp @ifI
-fld _1
-fstp @ifD
-fld @ifI
-fld @ifD
-fxch
-fcom 
-fstsw AX
-sahf
+FLD pivot
+FSTP @ifI
+FLD _1
+FSTP @ifD
+FLD @ifI
+FLD @ifD
+FXCH
+FCOM 
+FSTSW AX
+SAHF
 JAE branch0
 displayString _valor_menor_a_1_2
 NEWLINE
 JMP FOOTER
 NEWLINE
 branch0:
-
-;Comienza el codigo de posicion
-fld _valorNoDeterminado
-fstp __@resultado0
-
-;Codigo if
-fld pivot
-fstp @ifI
-fld _10
-fstp @ifD
-fld @ifI
-fld @ifD
-fxch
-fcom 
-fstsw AX
-sahf
-jne branch1
-fld _0
-fstp __@resultado0
+FLD _valorNoDeterminado
+FSTP __@resultado0
+FLD pivot
+FSTP @ifI
+FLD _10
+FSTP @ifD
+FLD @ifI
+FLD @ifD
+FXCH
+FCOM 
+FSTSW AX
+SAHF
+JNE branch1
+FLD _0
+FSTP __@resultado0
 branch1:
-
-;Codigo if
-fld pivot
-fstp @ifI
-fld _20
-fstp @ifD
-fld @ifI
-fld @ifD
-fxch
-fcom 
-fstsw AX
-sahf
-jne branch2
-fld _1
-fstp __@resultado0
+FLD pivot
+FSTP @ifI
+FLD _20
+FSTP @ifD
+FLD @ifI
+FLD @ifD
+FXCH
+FCOM 
+FSTSW AX
+SAHF
+JNE branch2
+FLD _1
+FSTP __@resultado0
 branch2:
-
-;Codigo if
-fld pivot
-fstp @ifI
-fld _30
-fstp @ifD
-fld @ifI
-fld @ifD
-fxch
-fcom 
-fstsw AX
-sahf
-jne branch3
-fld _2
-fstp __@resultado0
+FLD pivot
+FSTP @ifI
+FLD _30
+FSTP @ifD
+FLD @ifI
+FLD @ifD
+FXCH
+FCOM 
+FSTSW AX
+SAHF
+JNE branch3
+FLD _2
+FSTP __@resultado0
 branch3:
-
-;Codigo if
-fld pivot
-fstp @ifI
-fld _40
-fstp @ifD
-fld @ifI
-fld @ifD
-fxch
-fcom 
-fstsw AX
-sahf
-jne branch4
-fld _3
-fstp __@resultado0
+FLD pivot
+FSTP @ifI
+FLD _40
+FSTP @ifD
+FLD @ifI
+FLD @ifD
+FXCH
+FCOM 
+FSTSW AX
+SAHF
+JNE branch4
+FLD _3
+FSTP __@resultado0
 branch4:
-
-;Codigo if
-fld pivot
-fstp @ifI
-fld _5
-fstp @ifD
-fld @ifI
-fld @ifD
-fxch
-fcom 
-fstsw AX
-sahf
-jne branch5
-fld _4
-fstp __@resultado0
+FLD pivot
+FSTP @ifI
+FLD _5
+FSTP @ifD
+FLD @ifI
+FLD @ifD
+FXCH
+FCOM 
+FSTSW AX
+SAHF
+JNE branch5
+FLD _4
+FSTP __@resultado0
 branch5:
-
-;Codigo if
-fld pivot
-fstp @ifI
-fld _4
-fstp @ifD
-fld @ifI
-fld @ifD
-fxch
-fcom 
-fstsw AX
-sahf
-jne branch6
-fld _5
-fstp __@resultado0
+FLD pivot
+FSTP @ifI
+FLD _4
+FSTP @ifD
+FLD @ifI
+FLD @ifD
+FXCH
+FCOM 
+FSTSW AX
+SAHF
+JNE branch6
+FLD _5
+FSTP __@resultado0
 branch6:
-fld __@resultado0
-fstp resul
-
-;Validacion de elemento no encontrado
-fld resul
-fstp @ifI
-fld _valorNoDeterminado
-fstp @ifD
-fld @ifI
-fld @ifD
-fxch
-fcom 
-fstsw AX
-sahf
-jne branch7
+FLD __@resultado0
+FSTP resul
+FLD resul
+FSTP @ifI
+FLD _valorNoDeterminado
+FSTP @ifD
+FLD @ifI
+FLD @ifD
+FXCH
+FCOM 
+FSTSW AX
+SAHF
+JNE branch7
 displayString _elemento_no_encontrado_1
 NEWLINE
 JMP FOOTER
@@ -182,14 +164,14 @@ NEWLINE
 branch7:
 displayString _Elemento_encontrado_en_posicion____5
 NEWLINE
-fld resul
-fld _1
+FLD resul
+FLD _1
 FADD
-fstp resul
+FSTP resul
 DisplayFloat resul,1
 NEWLINE
 FOOTER:
-mov AX,4C00h                  
-int 21h
+MOV AX,4C00h
+INT 21h
 
 END inicio

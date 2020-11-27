@@ -17,7 +17,7 @@ char tempBufferResultado[800];
 
 void generarAssembler(ast *_pProg, t_tabla *tablaTS)
 {
-    FILE *file = fopen("Final.asm", "w");
+    FILE *file = fopen(NOMBRE_ARCHIVO_ASM, "w");
     if (file == NULL)
     {
         printf("No se pudo crear el archivo final.asm \n");
@@ -59,9 +59,11 @@ void recorrerArbol(ast *root, FILE *archAssembler)
             fueValidacionListaVacia = 1;
             t_simbolo *lexema = getLexema(root->right->right->value);
 
-            fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM); //cargo el lado derecho
+            // Cargo el lado derecho (con el valor no determinado)
+            fprintf(archAssembler, "FLD %s\n", lexema->data.nombreASM);
             lexema = getLexema(root->right->left->value);
-            fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM); //lo guardo en la variable del lado izquierdo
+            // Lo guardo en @resultado..
+            fprintf(archAssembler, "FSTP %s\n", lexema->data.nombreASM);
         }
     }
     else if (strcmp(root->value, WRITE_NODE) == 0)
@@ -69,17 +71,23 @@ void recorrerArbol(ast *root, FILE *archAssembler)
         t_simbolo *lexema = getLexema(root->right->value);
         if (strcmp(lexema->data.tipo, CONST_STR) == 0)
         {
+            // Utilizo el macro para mostrar strings
             fprintf(archAssembler, "displayString %s\nNEWLINE\n", lexema->data.nombreASM);
+
+            // En caso de que me encuentre en el write correspondiente a "Elemento no encontrado"
             if (branchElementoNoEncontrado)
             {
                 branchElementoNoEncontrado = 0;
+                // Realizo un salto incondicional al final del programa
                 fprintf(archAssembler, "JMP FOOTER\nNEWLINE\n");
                 fprintf(archAssembler, "branch%d:\n", branchN); //aca cae si dio false
                 branchN++;
             }
+            // En caso de que me encuentre en el write correspondiente a "Pivot menor a uno"
             else if (branchPivotMenorAUno)
             {
                 branchPivotMenorAUno = 0;
+                // Realizo un salto incondicional al final del programa
                 fprintf(archAssembler, "JMP FOOTER\nNEWLINE\n");
                 fprintf(archAssembler, "branch%d:\n", branchN); //aca cae si dio false
                 branchN++;
@@ -87,17 +95,23 @@ void recorrerArbol(ast *root, FILE *archAssembler)
         }
         else
         {
-            fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM);  //cargo el lado derecho
-            fprintf(archAssembler, "fld _1\n");                          //cargo el lado derecho
-            fprintf(archAssembler, "FADD\n");                            //Sumo
-            fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM); //Sumo
+            // Caso que se utiliza al imprimir las variables
+            fprintf(archAssembler, "FLD %s\n", lexema->data.nombreASM);
+            // Debo agregar el 1, de forma tal que se sume al valor cargado en la linea anterior
+            // De esta forma, se podra visualizar los resultados con el numero sin indice arrancando en 0.
+            fprintf(archAssembler, "FLD _1\n");
+            fprintf(archAssembler, "FADD\n");
+            // Lo almaceno en la variable que ya tenia
+            fprintf(archAssembler, "FSTP %s\n", lexema->data.nombreASM);
+            // Muestro la posición en la cual se encontró el pivot
             fprintf(archAssembler, "DisplayFloat %s,1\nNEWLINE\n", lexema->data.nombreASM);
         }
     }
     else if (strcmp(root->value, READ_NODE) == 0)
     {
         t_simbolo *lexema = getLexema(root->right->value);
-        fprintf(archAssembler, "GetFloat %s\nNEWLINE\n", lexema->data.nombreASM); //directamente levanto un float porque sino rompe la division
+        // En el caso de estar en un nodo READ, debo leer un numero de tipo FLOAT
+        fprintf(archAssembler, "GetFloat %s\nNEWLINE\n", lexema->data.nombreASM);
     }
     else if (strcmp(root->value, "=") == 0)
     {
@@ -105,33 +119,47 @@ void recorrerArbol(ast *root, FILE *archAssembler)
 
         if (strcmp(root->right->value, VALOR_NO_DETERMINADO) == 0)
         {
-            fprintf(archAssembler, "\n;Validacion de elemento no encontrado\n");
+            // Cargo el lado izquierdo en la variable @ifI
             t_simbolo *lexemaI = getLexema(root->left->value);
-            fprintf(archAssembler, "fld %s\n", lexemaI->data.nombreASM);
-            fprintf(archAssembler, "fstp @ifI\n");
+            fprintf(archAssembler, "FLD %s\n", lexemaI->data.nombreASM);
+            fprintf(archAssembler, "FSTP @ifI\n");
+
+            // Cargo el lado derecho en la variable @ifD
             t_simbolo *lexemaD = getLexema(root->right->value);
-            fprintf(archAssembler, "fld %s\n", lexemaD->data.nombreASM);
-            fprintf(archAssembler, "fstp @ifD\n");
-            fprintf(archAssembler, "fld @ifI\n");              //carga @ifI
-            fprintf(archAssembler, "fld @ifD\n");              //carga @ifD
-            fprintf(archAssembler, "fxch\n");                  //intercambia las posiciones 0 y 1
-            fprintf(archAssembler, "fcom \n");                 //compara
-            fprintf(archAssembler, "fstsw AX\nsahf\n");        //no se si porque sentencia es necesaria
-            fprintf(archAssembler, "jne branch%d\n", branchN); // si dio false, salteate lo siguiente
+            fprintf(archAssembler, "FLD %s\n", lexemaD->data.nombreASM);
+            fprintf(archAssembler, "FSTP @ifD\n");
+
+            // Cargo ambos valores
+            fprintf(archAssembler, "FLD @ifI\n");
+            fprintf(archAssembler, "FLD @ifD\n");
+
+            // Intercambio posiciones, comparo y paso las flags
+            fprintf(archAssembler, "FXCH\n");
+            fprintf(archAssembler, "FCOM \n");
+            fprintf(archAssembler, "FSTSW AX\nSAHF\n");
+
+            // En caso de que no sea igual (es decir, el elemento analizado no es igual al pivot) debo realizar un salto
+            fprintf(archAssembler, "JNE branch%d\n", branchN);
+
+            // En la proxima iteración, se arma el código para "Elemento no encontrado"
             branchElementoNoEncontrado = 1;
         }
         else if (strcmp(root->right->value, "=") == 0)
         {
+            // Cargo la variable derecha
             t_simbolo *lexema = getLexema(root->right->right->value);
-            fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM); //cargo el lado derecho
+            fprintf(archAssembler, "FLD %s\n", lexema->data.nombreASM);
+
+            // La almaceno en la izquierda
             lexema = getLexema(root->left->value);
-            fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM); //lo guardo en la variable del lado izquierdo
+            fprintf(archAssembler, "FSTP %s\n", lexema->data.nombreASM);
         }
         else if (strcmp(root->right->value, PUNTO_Y_COMA) == 0)
         {
             generarAssemblerAsignacion(root->right, archAssembler);
+            // Luego de generar el codigo para asignación, almaceno en el nodo izquierdo
             t_simbolo *lexema = getLexema(root->left->value);
-            fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM);
+            fprintf(archAssembler, "FSTP %s\n", lexema->data.nombreASM);
         }
         else
         {
@@ -142,23 +170,34 @@ void recorrerArbol(ast *root, FILE *archAssembler)
     {
         if (strcmp(root->right->value, "_1") == 0)
         {
-            fprintf(archAssembler, "\n;Validacion de pivot mayor o igual a 1\n");
+            // Cargo el lado izquierdo en la variable @ifI
             t_simbolo *lexemaI = getLexema(root->left->value);
-            fprintf(archAssembler, "fld %s\n", lexemaI->data.nombreASM);
-            fprintf(archAssembler, "fstp @ifI\n");
+            fprintf(archAssembler, "FLD %s\n", lexemaI->data.nombreASM);
+            fprintf(archAssembler, "FSTP @ifI\n");
+
+            // Cargo el lado derecho en la variable @ifD
             t_simbolo *lexemaD = getLexema(root->right->value);
-            fprintf(archAssembler, "fld %s\n", lexemaD->data.nombreASM);
-            fprintf(archAssembler, "fstp @ifD\n");
-            fprintf(archAssembler, "fld @ifI\n");              //carga @ifI
-            fprintf(archAssembler, "fld @ifD\n");              //carga @ifD
-            fprintf(archAssembler, "fxch\n");                  //intercambia las posiciones 0 y 1
-            fprintf(archAssembler, "fcom \n");                 //compara
-            fprintf(archAssembler, "fstsw AX\nsahf\n");        //no se si porque sentencia es necesaria
-            fprintf(archAssembler, "JAE branch%d\n", branchN); // si dio false, salteate lo siguiente
+            fprintf(archAssembler, "FLD %s\n", lexemaD->data.nombreASM);
+            fprintf(archAssembler, "FSTP @ifD\n");
+
+            // Cargo ambos valores
+            fprintf(archAssembler, "FLD @ifI\n");
+            fprintf(archAssembler, "FLD @ifD\n");
+
+            // Intercambio posiciones, comparo y paso las flags
+            fprintf(archAssembler, "FXCH\n");
+            fprintf(archAssembler, "FCOM \n");
+            fprintf(archAssembler, "FSTSW AX\nSAHF\n");
+
+            // En caso de que sea mayor o igual a 1 debo realizar un salto
+            fprintf(archAssembler, "JAE branch%d\n", branchN);
+
+            // En la proxima iteración, se arma el código para "Pivot menor a uno"
             branchPivotMenorAUno = 1;
         }
     }
 
+    // En caso de tener nodo a derecha y que actualmente no tengo asignacion o validacion de lista vacia, continuo explorando el arbol
     if ((root->right != NULL) && !(fueAsignacion) && !(fueValidacionListaVacia))
     {
         recorrerArbol(root->right, archAssembler);
@@ -169,12 +208,17 @@ void generarAssemblerAsignacionSimple(ast *root, FILE *archAssembler)
 {
     t_simbolo *lexema = getLexema(root->right->value);
 
-    fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM); //cargo el lado derecho
+    // Cargo la variable del lado derecho
+    fprintf(archAssembler, "FLD %s\n", lexema->data.nombreASM);
     lexema = getLexema(root->left->value);
-    fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM); //lo guardo en la variable del lado izquierdo
+    // La almaceno del lado izquierdo
+    fprintf(archAssembler, "FSTP %s\n", lexema->data.nombreASM);
 
+    // En caso de ser una de las variables @resultado..
     if (strstr(lexema->data.nombreASM, "__@resultado"))
     {
+        // Debo actualizar el buffer temporal con el string
+        // De esta forma, en las siguientes iteraciones sé a que @resultado debo asignar los resultados del proceso
         sprintf(tempBufferResultado, "%s", strstr(lexema->data.nombreASM, "__@resultado"));
     }
 }
@@ -185,37 +229,47 @@ void generarAssemblerPosicion(ast *root, FILE *archAssembler)
     {
         if (strcmp(root->right->value, VALOR_NO_DETERMINADO) == 0)
         {
-            fprintf(archAssembler, "\n;Comienza el codigo de posicion\n");
             generarAssemblerAsignacionSimple(root, archAssembler);
         }
     }
     else
     {
-
         if (root->left != NULL)
         {
             generarAssemblerPosicion(root->left, archAssembler);
         }
         if (strcmp(root->value, IF) == 0)
         {
-            fprintf(archAssembler, "\n;Codigo if\n");
-            // printf("izq izq es %s", root->left->left->value  );
+            // Cargo el lado izquierdo en la variable @ifI
             t_simbolo *lexemaI = getLexema(root->left->left->value);
-            fprintf(archAssembler, "fld %s\n", lexemaI->data.nombreASM);
-            fprintf(archAssembler, "fstp @ifI\n");
-            // printf("izq der es %s", root->left->right->value  );
+            fprintf(archAssembler, "FLD %s\n", lexemaI->data.nombreASM);
+            fprintf(archAssembler, "FSTP @ifI\n");
+
+            // Cargo el lado derecho en la variable @ifD
             t_simbolo *lexemaD = getLexema(root->left->right->value);
-            fprintf(archAssembler, "fld %s\n", lexemaD->data.nombreASM);
-            fprintf(archAssembler, "fstp @ifD\n");
-            fprintf(archAssembler, "fld @ifI\n");                         //carga @ifI
-            fprintf(archAssembler, "fld @ifD\n");                         //carga @ifD
-            fprintf(archAssembler, "fxch\n");                             //intercambia las posiciones 0 y 1
-            fprintf(archAssembler, "fcom \n");                            //compara
-            fprintf(archAssembler, "fstsw AX\nsahf\n");                   //no se si porque sentencia es necesaria
-            fprintf(archAssembler, "jne branch%d\n", branchN);            // si dio false, salteate lo siguiente
-            generarAssemblerAsignacionSimple(root->right, archAssembler); //como se que siempre va ser una asignacion ya le llamo esto
-            fprintf(archAssembler, "branch%d:\n", branchN);               //aca cae si dio false
-            branchN++;                                                    //sumo el numero de branch
+            fprintf(archAssembler, "FLD %s\n", lexemaD->data.nombreASM);
+            fprintf(archAssembler, "FSTP @ifD\n");
+
+            // Cargo ambos valores
+            fprintf(archAssembler, "FLD @ifI\n");
+            fprintf(archAssembler, "FLD @ifD\n");
+
+            // Intercambio posiciones, comparo y paso las flags
+            fprintf(archAssembler, "FXCH\n");
+            fprintf(archAssembler, "FCOM \n");
+            fprintf(archAssembler, "FSTSW AX\nSAHF\n");
+
+            // En caso de que no sea igual (es decir, el elemento analizado no es igual al pivot) debo realizar un salto
+            fprintf(archAssembler, "JNE branch%d\n", branchN);
+
+            // Si son iguales, entonces asigno el valor a mi variable @resultado..
+            generarAssemblerAsignacionSimple(root->right, archAssembler);
+
+            // Continuo, en caso de que sea falso
+            fprintf(archAssembler, "branch%d:\n", branchN);
+
+            // Aumento el contador de branch
+            branchN++;
         }
         else if (root->right != NULL)
         {
@@ -231,6 +285,7 @@ void crearSeccionData(FILE *archAssembler, t_tabla *tablaTS)
 
     fprintf(archAssembler, "%s\n\n", ".DATA");
 
+    // Tomo la tabla de simbolos y voy armando el codigo para cada entrada
     while (tablaSimbolos)
     {
         aux = tablaSimbolos;
@@ -260,6 +315,8 @@ void crearSeccionData(FILE *archAssembler, t_tabla *tablaTS)
             fprintf(archAssembler, "%-50s%-15s%-15s\n", aux->data.nombreASM, "db", valor);
         }
     }
+
+    // Utilizaré dos variables auxiliares para hacer de forma más práctica las comparaciones
     fprintf(archAssembler, "%-50s%-15s%-15s%-15s\n", "@ifI", "dd", "?", "; Variable para condición izquierda");
     fprintf(archAssembler, "%-50s%-15s%-15s%-15s\n", "@ifD", "dd", "?", "; Variable para condición derecha");
 }
@@ -267,18 +324,18 @@ void crearSeccionData(FILE *archAssembler, t_tabla *tablaTS)
 void generarAssemblerAsignacion(ast *root, FILE *archAssembler)
 {
     generarAssemblerPosicion(root, archAssembler);
-    fprintf(archAssembler, "fld %s\n", tempBufferResultado);
+    fprintf(archAssembler, "FLD %s\n", tempBufferResultado);
 }
 
 void crearSeccionCode(FILE *archAssembler)
 {
     fprintf(archAssembler, "\n%s\n\n%s\n\n", ".CODE", "inicio:");
-    fprintf(archAssembler, "%-30s%-30s\n", "mov AX,@DATA", "; Inicializa el segmento de datos");
-    fprintf(archAssembler, "%-30s\n%-30s\n\n", "mov DS,AX", "mov ES,AX");
+    fprintf(archAssembler, "%-30s\n", "MOV AX,@DATA");
+    fprintf(archAssembler, "%-30s\n%-30s\n\n", "MOV DS,AX", "MOV ES,AX");
 }
 void generaFooter(FILE *archAssembler)
 {
     fprintf(archAssembler, "FOOTER:");
-    fprintf(archAssembler, "\n%-30s\n", "mov AX,4C00h");
-    fprintf(archAssembler, "%s\n\n%s", "int 21h", "END inicio");
+    fprintf(archAssembler, "\n%s\n", "MOV AX,4C00h");
+    fprintf(archAssembler, "%s\n\n%s", "INT 21h", "END inicio");
 }
