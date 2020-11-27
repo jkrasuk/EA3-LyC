@@ -27,19 +27,19 @@ POSICION								[Pp][Oo][Ss][Ii][Cc][Ii][Oo][Nn]
 
 %%
 
-"="										{ return ASIG; }
-"("										{ return PARA; }
-")"										{ return PARC; }
-"["										{ return CA; }
-"]"										{ return CC; }
-";"										{ return PYC; }
-","										{ return COMA; }
-{WRITE}									{ return WRITE; }
-{READ}									{ return READ; }
-{POSICION}								{ return POSICION; }
-{CTE_STRING}							{ validarLimitesConstanteString(); strcpy(yylval.strVal, yytext);  return CTE_STRING; }
-{CTE_INT}								{ validarLimitesConstanteInt(); yylval.intVal = atoi(yytext);  return CTE_INT; }
-{ID}									{ strcpy(yylval.strVal, yytext); validarID();  return ID; }
+"="										{ return asigna; }
+"("										{ return para; }
+")"										{ return parc; }
+"["										{ return ca; }
+"]"										{ return cc; }
+";"										{ return pyc; }
+","										{ return coma; }
+{WRITE}									{ return write; }
+{READ}									{ return read; }
+{POSICION}								{ return posicion; }
+{CTE_STRING}							{ validarLimitesConstanteString(); strcpy(yylval.strVal, yytext);  return cte_s; }
+{CTE_INT}								{ validarLimitesConstanteInt(); yylval.intVal = atoi(yytext);  return cte; }
+{ID}									{ strcpy(yylval.strVal, yytext); validarID();  return id; }
 {DELIM}
 <<EOF>> {yyterminate();}
 %%

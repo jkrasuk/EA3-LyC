@@ -23,17 +23,17 @@ char *puntBufferTs, *puntBufferNombrePivot, *puntBufferPosicion;
 int indicePosicion = 0, i = 0, funcionPosicion = 0, funcionRead = 0, tengoLista = 0;
 ast *_write, *_read, *_asig, *_posicion, *_condPosicion, *_nodoComprobacionValidacion, *_nodoMensajeValidacion, *_pProg, *_pSent;
 %}
-%token ID CTE_INT CTE_STRING
-%token ASIG
-%token PARA PARC CA CC PYC COMA
-%token WRITE READ
-%token POSICION
+%token id cte cte_s
+%token asigna
+%token para parc ca cc pyc coma
+%token write read
+%token posicion
 
-%type <intVal> CTE_INT
-%type <strVal> CTE_STRING
-%type <strVal> ID
+%type <intVal> cte
+%type <strVal> cte_s
+%type <strVal> id
 
-%start s
+%start S
 
 %union
 {
@@ -44,12 +44,12 @@ ast *_write, *_read, *_asig, *_posicion, *_condPosicion, *_nodoComprobacionValid
 }
 %%
 
-s: 
+S: 
   {
     printf("Inicia COMPILADOR\n");
 }
-  prog {
-        printf("\n Regla 0 - s: PROG \n");
+  PROG {
+        printf("\n Regla 0: S -> PROG \n");
         generarAssembler(_pProg, obtenerTablaTS()); 
         guardarTS();
         print2D(_pProg); 
@@ -58,7 +58,7 @@ s:
   }
   ;
 
-prog: prog sent {
+PROG: PROG SENT {
     _pProg = newNode(PUNTO_Y_COMA, _pProg, _pSent); 
     
     if(funcionPosicion)
@@ -82,17 +82,17 @@ prog: prog sent {
         _pProg = newNode(PUNTO_Y_COMA, _pProg, newNode(IF, _nodoComprobacionValidacion, _nodoMensajeValidacion));
     }
 
-    printf("\n Regla 2 - prog: prog sent \n");
+    printf("\n Regla 2: PROG -> PROG SENT \n");
     }
-  | sent {_pProg = _pSent; printf("\n Regla 1 - prog: sent \n");}
+  | SENT {_pProg = _pSent; printf("\n Regla 1: PROG -> SENT \n");}
   ;
 
-sent: read {_pSent = _read; printf("\n Regla 3 - prog: read \n");}
-  | write {_pSent = _write; printf("\n Regla 3 - prog: write \n");}
-  | asig {_pSent = _asig; printf("\n Regla 3 - prog: asig \n");}
+SENT: READ {_pSent = _read; printf("\n Regla 3: SENT -> READ \n");}
+  | WRITE {_pSent = _write; printf("\n Regla 3: SENT -> WRITE \n");}
+  | ASIG {_pSent = _asig; printf("\n Regla 3: SENT -> ASIG \n");}
   ;
 
-read: READ ID {
+READ: read id {
                 sprintf(bufferTS,"%s", $2);
                 puntBufferTs = strtok(bufferTS, " ;\n"); 
                 if(insertarTS(puntBufferTs, TIPO_INT, "", 0, 0) != 0)
@@ -100,13 +100,13 @@ read: READ ID {
                   fprintf(stdout, "%s%s%s", "Error: la variable '", puntBufferTs, "' ya fue declarada");
                 }
                 _read = newNode(READ_NODE, NULL ,newLeaf(puntBufferTs));
-                printf("\n Regla 4 - read: read ID \n");
+                printf("\n Regla 4: READ -> read id \n");
                 funcionPosicion = 0;
                 funcionRead = 1;
                 }
   ;
 
-asig: ID ASIG posicion {
+ASIG: id asigna POSICION {
                           sprintf(bufferTS,"%s", $1);
                           puntBufferTs = strtok(bufferTS, " ;\n"); 
                           if(insertarTS(puntBufferTs, TIPO_INT, "", 0, 0) != 0)
@@ -114,23 +114,23 @@ asig: ID ASIG posicion {
                             fprintf(stdout, "%s%s%s", "Error: la variable '", puntBufferTs, "' ya fue declarada");
                           }
                           _asig = newNode("=", newLeaf(puntBufferTs) , _posicion );                                 
-                          printf("\n Regla 5 - asig: ID ASIG posicion \n");
+                          printf("\n Regla 5: ASIG -> id asigna POSICION \n");
                           funcionPosicion = 1;
                           funcionRead = 0;
                           }
   ;
 
-posicion: 
-  POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} lista CC PARC {
-    tengoLista = 1; aumentarContadorVariableResultado(); limpiarLista(); printf("\n Regla 6 - posicion: POSICION PARA ID PYC CA lista CC PARC \n");}
-  | POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} CC PARC {
+POSICION: 
+  posicion para id pyc ca {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} LISTA cc parc {
+    tengoLista = 1; aumentarContadorVariableResultado(); limpiarLista(); printf("\n Regla 6: POSICION -> posicion para id pyc ca LISTA cc parc \n");}
+  | posicion para id pyc ca {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} cc parc {
     tengoLista = 0;
     _posicion = newLeaf(VALOR_NO_DETERMINADO);
 
-    printf("\n Regla 6 - posicion: POSICION PARA ID PYC CA CC PARC \n");}
+    printf("\n Regla 7: POSICION -> posicion para id pyc ca cc parc \n");}
   ;
 
-lista: CTE_INT {
+LISTA: cte {
                 // Inicializo la posicion en 0
                 indicePosicion = 0;
                 sprintf(bufferPosicion,"%d", indicePosicion);
@@ -158,9 +158,9 @@ lista: CTE_INT {
                 // Creo un nuevo nodo                        
                 _posicion = newNode(PUNTO_Y_COMA, newNode("=", newLeaf(obtenerStringVariableResultadoTS()) , newLeaf( VALOR_NO_DETERMINADO )), _condPosicion);
 
-                printf("\n Regla 8 - lista: CTE_INT \n");
+                printf("\n Regla 8: LISTA -> cte \n");
                 }
-  | lista COMA CTE_INT {
+  | LISTA coma cte {
                         // Aumento la posicion
                         indicePosicion++;
 
@@ -180,24 +180,24 @@ lista: CTE_INT {
                         _posicion = newNode(PUNTO_Y_COMA, _posicion , _condPosicion );
 
 
-                        printf("\n Regla 9 - lista: lista COMA CTE_INT \n");
+                        printf("\n Regla 9: LISTA -> LISTA coma cte \n");
                         }
   ;
 
-write: WRITE CTE_STRING {
+WRITE: write cte_s {
                             sprintf(bufferTS,"%s", $2);
                             puntBufferTs = strtok(bufferTS,";\n");
                             insertarTS(puntBufferTs, CONST_STR, puntBufferTs, 0, 0);
                             _write = newNode(WRITE_NODE, NULL, newLeaf(puntBufferTs));
-                            printf("\n Regla 10 - write: WRITE_NODE CTE_STRING \n");
+                            printf("\n Regla 10: WRITE -> write cte_s \n");
                             funcionPosicion = 0;
                             funcionRead = 0;
                           }
-  | WRITE ID {
+  | write id {
                 sprintf(bufferTS,"%s", $2);
                 puntBufferTs = strtok(bufferTS,";\n");
                 _write = newNode(WRITE_NODE, NULL, newLeaf(puntBufferTs));
-                printf("\n Regla 11 - write: WRITE_NODE ID \n");
+                printf("\n Regla 11: WRITE -> write id \n");
                 funcionPosicion = 0;
                 funcionRead = 0;
               }
