@@ -1,5 +1,4 @@
 NOMBRE                                                      TIPO DATO           VALOR                                             LONGITUD       
-@resultado                                                  INT                 -                                                 -              
 _elemento_no_encontrado_1                                   CONST_STR           "Elemento no encontrado"                          22             
 _valor_menor_a_1_2                                          CONST_STR           "El valor debe ser >= 1"                          22             
 _lista_vacia_3                                              CONST_STR           "Lista vacia"                                     11             
@@ -9,6 +8,7 @@ _Ingrese_un_valor_pivot_mayor_o_igual_a_1____4              CONST_STR           
 pivot                                                       INT                 -                                                 -              
 _3                                                          CONST_INT           3                                                 1              
 _0                                                          CONST_INT           0                                                 1              
+__@resultado0                                               CONST_INT           0                                                 12             
 _2                                                          CONST_INT           2                                                 1              
 _4                                                          CONST_INT           4                                                 1              
 resul                                                       INT                 -                                                 -              

@@ -29,7 +29,6 @@ typedef struct
     t_simbolo *primero;
 } t_tabla;
 
-void crearTablaTS();
 void inicializarTS();
 char *limpiarString(char *, const char *);
 int insertarTS(const char *, const char *, const char *, int, double);
@@ -37,18 +36,20 @@ t_data *crearDatos(const char *, const char *, const char *, int, double);
 void guardarTS();
 t_simbolo *getLexema(const char *);
 char *reemplazarString(char *, const char *);
+char *obtenerStringVariableResultado();
+void aumentarContadorVariableResultado();
+char *obtenerStringVariableResultadoTS();
+
 t_tabla *obtenerTablaTS();
 t_tabla tablaTS;
-
-int contadorString = 0;
-
+int contadorString = 0, variablesResultado = 0;
+char buffer[800];
 t_tabla *obtenerTablaTS()
 {
     return &(tablaTS);
 }
 void inicializarTS()
 {
-    crearTablaTS();
     insertarTS("_elemento_no_encontrado", CONST_STR, ELEMENTO_NO_ENCONTRADO, 0, 0);
     insertarTS("_valor_menor_a_1", CONST_STR, "\"El valor debe ser >= 1\"", 0, 0);
     insertarTS("_lista_vacia", CONST_STR, LISTA_VACIA, 0, 0);
@@ -56,35 +57,13 @@ void inicializarTS()
     insertarTS("_1", CONST_INT, "", 1, 0);
     insertarTS(VALOR_NO_DETERMINADO, CONST_INT, "", -1, 0);
 }
-void crearTablaTS()
-{
-    t_data *data = (t_data *)malloc(sizeof(t_data));
-    data = crearDatos("@resultado", TIPO_INT, "", 0, 0);
-
-    if (data == NULL)
-    {
-        return;
-    }
-
-    t_simbolo *nuevo = (t_simbolo *)malloc(sizeof(t_simbolo));
-
-    if (nuevo == NULL)
-    {
-        return;
-    }
-
-    nuevo->data = *data;
-    nuevo->next = NULL;
-    tablaTS.primero = nuevo;
-}
 
 int insertarTS(const char *nombre, const char *tipo, const char *valString, int valInt, double valDouble)
 {
-    printf("nombre: %s - valString %s - valInt %d", nombre, valString, valInt);
     t_simbolo *tabla = tablaTS.primero;
     char nombreCTE[300] = "_";
     strcat(nombreCTE, nombre);
-
+    printf("\nSOLICITUD PARA %s", nombreCTE);
     while (tabla)
     {
         if (strcmp(tabla->data.nombre, nombre) == 0 || strcmp(tabla->data.nombre, nombreCTE) == 0)
@@ -99,7 +78,7 @@ int insertarTS(const char *nombre, const char *tipo, const char *valString, int 
                 return 1;
             }
         }
-        else if (strcmp(tabla->data.tipo, CONST_INT) == 0 && strcmp(tipo, CONST_INT) == 0)
+        else if (strcmp(tabla->data.tipo, CONST_INT) == 0 && strcmp(tipo, CONST_INT) == 0 && strcmp(nombre, obtenerStringVariableResultadoTS()) != 0)
         {
 
             if (tabla->data.valor.valor_int == valInt)
@@ -153,7 +132,7 @@ t_data *crearDatos(const char *nombre, const char *tipo, const char *valString, 
     {
         return NULL;
     }
-
+    printf("\n SOLICITUD DE CREACION DE %s", nombre);
     data->tipo = (char *)malloc(sizeof(char) * (strlen(tipo) + 1));
     strcpy(data->tipo, tipo);
     if (strcmp(tipo, TIPO_STRING) == 0 || strcmp(tipo, TIPO_INT) == 0 || strcmp(tipo, TIPO_FLOAT) == 0)
@@ -195,6 +174,11 @@ t_data *crearDatos(const char *nombre, const char *tipo, const char *valString, 
                 sprintf(aux, "%s", "valorNoDeterminado");
                 strcat(full, aux);
             }
+            else if (strcmp(nombre, obtenerStringVariableResultadoTS()) == 0)
+            {
+                sprintf(aux, "%s", obtenerStringVariableResultadoTS());
+                strcat(full, aux);
+            }
             else
             {
                 sprintf(aux, "%d", valInt);
@@ -207,6 +191,8 @@ t_data *crearDatos(const char *nombre, const char *tipo, const char *valString, 
             data->nombreASM = (char *)malloc(sizeof(char) * (strlen(full) + 1));
 
             strcpy(data->nombreASM, full);
+
+            printf("\nResumen\n=========\nnombreASM: %s \nnombre: %s\nvalor: %d", data->nombreASM, data->nombre, data->valor.valor_int);
         }
         return data;
     }
@@ -319,4 +305,22 @@ char *reemplazarString(char *dest, const char *cad)
     dest[i] = '\0';
 
     return dest;
+}
+
+char *obtenerStringVariableResultado()
+{
+    sprintf(buffer, "@resultado%d", variablesResultado);
+
+    return buffer;
+}
+
+char *obtenerStringVariableResultadoTS()
+{
+    sprintf(buffer, "_@resultado%d", variablesResultado);
+
+    return buffer;
+}
+void aumentarContadorVariableResultado()
+{
+    variablesResultado++;
 }

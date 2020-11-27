@@ -122,7 +122,8 @@ asig: ID ASIG posicion {
   ;
 
 posicion: 
-  POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} lista CC PARC {tengoLista = 1; printf("\n Regla 6 - posicion: POSICION PARA ID PYC CA lista CC PARC \n");}
+  POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} lista CC PARC {
+    tengoLista = 1; aumentarContadorVariableResultado(); limpiarLista(); printf("\n Regla 6 - posicion: POSICION PARA ID PYC CA lista CC PARC \n");}
   | POSICION PARA ID PYC CA {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} CC PARC {
     tengoLista = 0;
     _posicion = newLeaf(VALOR_NO_DETERMINADO);
@@ -147,13 +148,16 @@ lista: CTE_INT {
                 puntBufferPosicion = strtok(bufferPosicion,";\n");
                 insertarTS(puntBufferPosicion, CONST_INT, "", insertarLista(numero, indicePosicion), 0);
 
+                // Voy a crear la variable auxiliar @resultado..
+                insertarTS(obtenerStringVariableResultado(), CONST_INT, "", 0, 0);
+                
                 _condPosicion = newNode( IF,
                  newNode("=", newLeaf(puntBufferNombrePivot) , newLeaf( puntBufferTs )) ,
-                 newNode("=", newLeaf("@resultado") , newLeaf( puntBufferPosicion ))
+                 newNode("=", newLeaf(obtenerStringVariableResultadoTS()) , newLeaf( puntBufferPosicion ))
                  );
 
                 // Creo un nuevo nodo                        
-                _posicion = newNode(PUNTO_Y_COMA, newNode("=", newLeaf("@resultado") , newLeaf( VALOR_NO_DETERMINADO )), _condPosicion);
+                _posicion = newNode(PUNTO_Y_COMA, newNode("=", newLeaf(obtenerStringVariableResultadoTS()) , newLeaf( VALOR_NO_DETERMINADO )), _condPosicion);
 
                 printf("\n Regla 8 - lista: CTE_INT \n");
                 }
@@ -173,7 +177,7 @@ lista: CTE_INT {
                         puntBufferPosicion = strtok(bufferPosicion,";\n");
                         insertarTS(puntBufferPosicion, CONST_INT, "", insertarLista(numero, indicePosicion), 0);
                         
-                        _condPosicion = newNode( IF, newNode("=", newLeaf(puntBufferNombrePivot) , newLeaf( puntBufferTs ) ) , newNode("=", newLeaf("@resultado") , newLeaf( puntBufferPosicion ) ));
+                        _condPosicion = newNode( IF, newNode("=", newLeaf(puntBufferNombrePivot) , newLeaf( puntBufferTs ) ) , newNode("=", newLeaf(obtenerStringVariableResultadoTS()) , newLeaf( puntBufferPosicion ) ));
                         _posicion = newNode(PUNTO_Y_COMA, _posicion , _condPosicion );
 
 

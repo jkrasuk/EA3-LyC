@@ -24,6 +24,7 @@ typedef struct
 t_list listaSimb;
 
 int insertarLista(const int cte, const int posicion);
+void limpiarLista();
 
 int insertarLista(const int cte, const int posicion)
 {
@@ -74,4 +75,16 @@ int insertarLista(const int cte, const int posicion)
     }
 
     return posicion;
+}
+
+void limpiarLista()
+{
+    t_simbolo_list *pElim = listaSimb.primero;
+
+    while (listaSimb.primero)
+    {
+        listaSimb.primero = listaSimb.primero->next;
+        free(pElim);
+        pElim = listaSimb.primero;
+    }
 }

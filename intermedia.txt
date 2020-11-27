@@ -29,7 +29,7 @@
 
                                                                       =
 
-                                                                                @resultado
+                                                                                _@resultado0
 
                                                             IF
 
@@ -45,7 +45,7 @@
 
                                                                                 =
 
-                                                                                          @resultado
+                                                                                          _@resultado0
 
                                                                       IF
 
@@ -61,7 +61,7 @@
 
                                                                                           =
 
-                                                                                                    @resultado
+                                                                                                    _@resultado0
 
                                                                                 IF
 
@@ -77,7 +77,7 @@
 
                                                                                                     =
 
-                                                                                                              @resultado
+                                                                                                              _@resultado0
 
                                                                                           IF
 
@@ -93,7 +93,7 @@
 
                                                                                           =
 
-                                                                                                    @resultado
+                                                                                                    _@resultado0
 
                                         =
 

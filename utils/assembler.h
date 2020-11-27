@@ -14,6 +14,7 @@ void generarAssemblerAsignacion(ast *root, FILE *archAssembler);
 void generarAssemblerAsignacionSimple(ast *root, FILE *archAssembler);
 
 int branchN = 0, branchElementoNoEncontrado = 0, branchPivotMenorAUno = 0;
+char tempBufferResultado[800];
 
 void generarAssembler(ast *_pProg, t_tabla *tablaTS)
 {
@@ -173,6 +174,11 @@ void generarAssemblerAsignacionSimple(ast *root, FILE *archAssembler)
     fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM); //cargo el lado derecho
     lexema = getLexema(root->left->value);
     fprintf(archAssembler, "fstp %s\n", lexema->data.nombreASM); //lo guardo en la variable del lado izquierdo
+
+    if (strstr(lexema->data.nombreASM, "__@resultado"))
+    {
+        sprintf(tempBufferResultado, "%s", strstr(lexema->data.nombreASM, "__@resultado"));
+    }
 }
 
 void generarAssemblerPosicion(ast *root, FILE *archAssembler)
@@ -263,7 +269,7 @@ void crearSeccionData(FILE *archAssembler, t_tabla *tablaTS)
 void generarAssemblerAsignacion(ast *root, FILE *archAssembler)
 {
     generarAssemblerPosicion(root, archAssembler);
-    fprintf(archAssembler, "fld @resultado\n");
+    fprintf(archAssembler, "fld %s\n", tempBufferResultado);
 }
 
 void crearSeccionCode(FILE *archAssembler)

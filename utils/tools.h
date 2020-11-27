@@ -11,3 +11,4 @@
 #define TIPO_INT "INT"
 #define TIPO_FLOAT "FLOAT"
 #define TIPO_STRING "STRING"
+#define RESULTADO "@resultado"

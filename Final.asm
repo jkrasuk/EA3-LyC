@@ -8,7 +8,6 @@ include number.asm
 
 .DATA
 
-@resultado                                        dd             ?              
 _elemento_no_encontrado_1                         db             "Elemento no encontrado", '$', 22 dup (?)
 _valor_menor_a_1_2                                db             "El valor debe ser >= 1", '$', 22 dup (?)
 _lista_vacia_3                                    db             "Lista vacia", '$', 11 dup (?)
@@ -18,6 +17,7 @@ _Ingrese_un_valor_pivot_mayor_o_igual_a_1____4    db             "Ingrese un val
 pivot                                             dd             ?              
 _3                                                dd             3.0            
 _0                                                dd             0.0            
+__@resultado0                                     dd             0.0            
 _2                                                dd             2.0            
 _4                                                dd             4.0            
 resul                                             dd             ?              
@@ -58,7 +58,7 @@ branch0:
 
 ;Comienza el codigo de posicion
 fld _valorNoDeterminado
-fstp @resultado
+fstp __@resultado0
 
 ;Codigo if
 fld pivot
@@ -73,7 +73,7 @@ fstsw AX
 sahf
 jne branch1
 fld _0
-fstp @resultado
+fstp __@resultado0
 branch1:
 
 ;Codigo if
@@ -89,7 +89,7 @@ fstsw AX
 sahf
 jne branch2
 fld _1
-fstp @resultado
+fstp __@resultado0
 branch2:
 
 ;Codigo if
@@ -105,7 +105,7 @@ fstsw AX
 sahf
 jne branch3
 fld _2
-fstp @resultado
+fstp __@resultado0
 branch3:
 
 ;Codigo if
@@ -121,9 +121,9 @@ fstsw AX
 sahf
 jne branch4
 fld _3
-fstp @resultado
+fstp __@resultado0
 branch4:
-fld @resultado
+fld __@resultado0
 fstp resul
 
 ;Validacion de elemento no encontrado
