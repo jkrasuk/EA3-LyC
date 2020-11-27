@@ -19,9 +19,9 @@ extern int yyleng;
 extern char *yytext;
 
 char bufferTS[800], bufferNombrePivot[800], bufferPosicion[800];
-char* puntBufferTs, *puntBufferNombrePivot, *puntBufferPosicion;
-int indicePosicion=0, i=0, funcionPosicion = 0, funcionRead = 0,tengoLista=0;
-ast * _write, * _read, *_asig, * _posicion, *_condPosicion,  * _nodoComprobacionValidacion, * _nodoMensajeValidacion, * _pProg ,* _pSent;
+char *puntBufferTs, *puntBufferNombrePivot, *puntBufferPosicion;
+int indicePosicion = 0, i = 0, funcionPosicion = 0, funcionRead = 0, tengoLista = 0;
+ast *_write, *_read, *_asig, *_posicion, *_condPosicion, *_nodoComprobacionValidacion, *_nodoMensajeValidacion, *_pProg, *_pSent;
 %}
 %token ID CTE_INT CTE_STRING
 %token ASIG
@@ -78,7 +78,7 @@ prog: prog sent {
     else if(funcionRead)
     {
         _nodoComprobacionValidacion = newNode("<", newLeaf(puntBufferTs), newLeaf("_1"));
-        _nodoMensajeValidacion = newNode(WRITE_NODE, NULL, newLeaf("\"El valor debe ser >= 1\""));
+        _nodoMensajeValidacion = newNode(WRITE_NODE, NULL, newLeaf(EL_VALOR_DEBE_SER_MAYOR_O_IGUAL_A_1));
         _pProg = newNode(PUNTO_Y_COMA, _pProg, newNode(IF, _nodoComprobacionValidacion, _nodoMensajeValidacion));
     }
 

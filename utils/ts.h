@@ -51,7 +51,7 @@ t_tabla *obtenerTablaTS()
 void inicializarTS()
 {
     insertarTS("_elemento_no_encontrado", CONST_STR, ELEMENTO_NO_ENCONTRADO, 0, 0);
-    insertarTS("_valor_menor_a_1", CONST_STR, "\"El valor debe ser >= 1\"", 0, 0);
+    insertarTS("_valor_menor_a_1", CONST_STR, EL_VALOR_DEBE_SER_MAYOR_O_IGUAL_A_1, 0, 0);
     insertarTS("_lista_vacia", CONST_STR, LISTA_VACIA, 0, 0);
     // Utilizado para comparar si el valor es mayor o igual a 1
     insertarTS("_1", CONST_INT, "", 1, 0);

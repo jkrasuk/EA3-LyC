@@ -94,10 +94,10 @@ void generarGraphviz(ast *arbol)
 void recorrerArbolGraphviz(ast *arbol, FILE *pf)
 {
     if (arbol == NULL)
+    {
         return;
-
-    //printf( "%s\t%d\n", arbol->value , arbol->nodeId );
-
+    }
+    
     if (arbol->left)
     {
         fprintf(pf, " N%d -> N%d; \n", arbol->nodeId, arbol->left->nodeId);
@@ -111,7 +111,7 @@ void recorrerArbolGraphviz(ast *arbol, FILE *pf)
     }
 
     if (strchr(arbol->value, '\"'))
-        if (strcmp(arbol->value, ELEMENTO_NO_ENCONTRADO) == 0 || strcmp(arbol->value, "\"El valor debe ser >= 1\"") == 0 || strcmp(arbol->value, LISTA_VACIA) == 0)
+        if (strcmp(arbol->value, ELEMENTO_NO_ENCONTRADO) == 0 || strcmp(arbol->value, EL_VALOR_DEBE_SER_MAYOR_O_IGUAL_A_1) == 0 || strcmp(arbol->value, LISTA_VACIA) == 0)
         {
             fprintf(pf, " N%d [peripheries=2; label = %s]\n", arbol->nodeId, arbol->value);
         }

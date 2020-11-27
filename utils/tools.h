@@ -1,5 +1,6 @@
 #define PUNTO_Y_COMA ";"
 #define ELEMENTO_NO_ENCONTRADO "\"Elemento no encontrado\""
+#define EL_VALOR_DEBE_SER_MAYOR_O_IGUAL_A_1 "\"El valor debe ser >= 1\""
 #define LISTA_VACIA "\"Lista vacia\""
 #define VALOR_NO_DETERMINADO "_valorNoDeterminado"
 #define CONST_INT "CONST_INT"
