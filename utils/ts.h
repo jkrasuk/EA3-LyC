@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <stdbool.h>
 
 typedef struct
 {
@@ -39,7 +38,8 @@ char *reemplazarString(char *, const char *);
 char *obtenerStringVariableResultado();
 void aumentarContadorVariableResultado();
 char *obtenerStringVariableResultadoTS();
-
+int lenHelper(unsigned x);
+int printLen(int x);
 t_tabla *obtenerTablaTS();
 t_tabla tablaTS;
 int contadorString = 0, variablesResultado = 0;
@@ -63,7 +63,7 @@ int insertarTS(const char *nombre, const char *tipo, const char *valString, int 
     t_simbolo *tabla = tablaTS.primero;
     char nombreCTE[300] = "_";
     strcat(nombreCTE, nombre);
-    printf("\nSOLICITUD PARA %s", nombreCTE);
+
     while (tabla)
     {
         if (strcmp(tabla->data.nombre, nombre) == 0 || strcmp(tabla->data.nombre, nombreCTE) == 0)
@@ -132,7 +132,7 @@ t_data *crearDatos(const char *nombre, const char *tipo, const char *valString, 
     {
         return NULL;
     }
-    printf("\n SOLICITUD DE CREACION DE %s", nombre);
+
     data->tipo = (char *)malloc(sizeof(char) * (strlen(tipo) + 1));
     strcpy(data->tipo, tipo);
     if (strcmp(tipo, TIPO_STRING) == 0 || strcmp(tipo, TIPO_INT) == 0 || strcmp(tipo, TIPO_FLOAT) == 0)
@@ -191,8 +191,6 @@ t_data *crearDatos(const char *nombre, const char *tipo, const char *valString, 
             data->nombreASM = (char *)malloc(sizeof(char) * (strlen(full) + 1));
 
             strcpy(data->nombreASM, full);
-
-            printf("\nResumen\n=========\nnombreASM: %s \nnombre: %s\nvalor: %d", data->nombreASM, data->nombre, data->valor.valor_int);
         }
         return data;
     }
@@ -227,7 +225,7 @@ void guardarTS()
         }
         else if (strcmp(aux->data.tipo, CONST_INT) == 0)
         {
-            sprintf(linea, "%-60s%-20s%-50d%-15d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_int, strlen(aux->data.nombre) - 1);
+            sprintf(linea, "%-60s%-20s%-50d%-15d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_int, printLen(aux->data.valor.valor_int));
         }
         else if (strcmp(aux->data.tipo, CONST_STR) == 0)
         {
@@ -323,4 +321,32 @@ char *obtenerStringVariableResultadoTS()
 void aumentarContadorVariableResultado()
 {
     variablesResultado++;
+}
+
+int lenHelper(unsigned x)
+{
+    if (x >= 1000000000)
+        return 10;
+    if (x >= 100000000)
+        return 9;
+    if (x >= 10000000)
+        return 8;
+    if (x >= 1000000)
+        return 7;
+    if (x >= 100000)
+        return 6;
+    if (x >= 10000)
+        return 5;
+    if (x >= 1000)
+        return 4;
+    if (x >= 100)
+        return 3;
+    if (x >= 10)
+        return 2;
+    return 1;
+}
+
+int printLen(int x)
+{
+    return x < 0 ? lenHelper(-x) + 1 : lenHelper(x);
 }

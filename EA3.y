@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h> 
-#include <stdbool.h>
 #include "./utils/tools.h"
 #include "./utils/tree.h"
 #include "./utils/list.h"

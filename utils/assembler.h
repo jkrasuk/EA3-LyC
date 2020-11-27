@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <stdbool.h>
 
 void generarAssembler(ast *_pProg, t_tabla *tablaTS);
 void generaHeader(FILE *);
@@ -44,8 +43,7 @@ void generaHeader(FILE *f)
 
 void recorrerArbol(ast *root, FILE *archAssembler)
 {
-    bool fueAsignacion = false;
-    bool fueValidacionListaVacia = false;
+    int fueAsignacion = 0, fueValidacionListaVacia = 0;
 
     // En caso de que exista un nodo por izquierda, se sigue el recorrido (de forma recursiva)
     if (root->left != NULL)
@@ -58,7 +56,7 @@ void recorrerArbol(ast *root, FILE *archAssembler)
         // Caso utilizado
         if (root->right && root->right->right && root->right->right->value && strcmp(root->right->right->value, VALOR_NO_DETERMINADO) == 0)
         {
-            fueValidacionListaVacia = true;
+            fueValidacionListaVacia = 1;
             t_simbolo *lexema = getLexema(root->right->right->value);
 
             fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM); //cargo el lado derecho
@@ -103,7 +101,7 @@ void recorrerArbol(ast *root, FILE *archAssembler)
     }
     else if (strcmp(root->value, "=") == 0)
     {
-        fueAsignacion = true;
+        fueAsignacion = 1;
 
         if (strcmp(root->right->value, VALOR_NO_DETERMINADO) == 0)
         {
