@@ -25,25 +25,29 @@ t_list listaSimb;
 int insertarLista(const int cte, const int posicion);
 void limpiarLista();
 
+// Utilizado para saber la primera aparición de un número en el vector de valores
 int insertarLista(const int cte, const int posicion)
 {
-    t_simbolo_list *tabla = listaSimb.primero;
+    t_simbolo_list *lista = listaSimb.primero;
 
-    while (tabla)
+    // Primero, recorro la lista para ver si ya existe
+    while (lista)
     {
-        if (tabla->data.indice == cte)
+        // En caso de que el numero ya este archivado en la lista, retorno la propiedad "posicion"
+        if (lista->data.indice == cte)
         {
-            return tabla->data.posicion;
+            return lista->data.posicion;
         }
 
-        if (tabla->next == NULL)
+        if (lista->next == NULL)
         {
             break;
         }
 
-        tabla = tabla->next;
+        lista = lista->next;
     }
 
+    // Si no lo encontre, procedo a la creacion
     t_data_list *data = (t_data_list *)malloc(sizeof(t_data_list));
 
     data->indice = cte;
@@ -70,12 +74,14 @@ int insertarLista(const int cte, const int posicion)
     }
     else
     {
-        tabla->next = nuevo;
+        lista->next = nuevo;
     }
 
     return posicion;
 }
 
+// Una vez que ya termine todo el procesamiento, debo vaciar la lista
+// De esta forma, si hay alguna otra funcion posicion, no se retornan los indices viejos
 void limpiarLista()
 {
     t_simbolo_list *pElim = listaSimb.primero;

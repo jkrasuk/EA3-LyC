@@ -42,14 +42,18 @@ int lenHelper(unsigned x);
 int printLen(int x);
 t_tabla *obtenerTablaTS();
 t_tabla tablaTS;
+
 int contadorString = 0, variablesResultado = 0;
 char buffer[800];
+
 t_tabla *obtenerTablaTS()
 {
     return &(tablaTS);
 }
+
 void inicializarTS()
 {
+    // En primer lugar, agrego a la TS los elementos necesarios para hacer validaciones
     insertarTS("_elemento_no_encontrado", CONST_STR, ELEMENTO_NO_ENCONTRADO, 0, 0);
     insertarTS("_valor_menor_a_1", CONST_STR, EL_VALOR_DEBE_SER_MAYOR_O_IGUAL_A_1, 0, 0);
     insertarTS("_lista_vacia", CONST_STR, LISTA_VACIA, 0, 0);
@@ -64,6 +68,7 @@ int insertarTS(const char *nombre, const char *tipo, const char *valString, int 
     char nombreCTE[300] = "_";
     strcat(nombreCTE, nombre);
 
+    // Primero voy a recorrer la tabla, para ver si encuentro coincidencias
     while (tabla)
     {
         if (strcmp(tabla->data.nombre, nombre) == 0 || strcmp(tabla->data.nombre, nombreCTE) == 0)
@@ -93,6 +98,8 @@ int insertarTS(const char *nombre, const char *tipo, const char *valString, int 
         }
         tabla = tabla->next;
     }
+
+    // Si llego aca, es porque no existe el elemento en la tabla de simbolos
     t_data *data = (t_data *)malloc(sizeof(t_data));
     data = crearDatos(nombre, tipo, valString, valInt, valDouble);
 
@@ -128,6 +135,7 @@ t_data *crearDatos(const char *nombre, const char *tipo, const char *valString, 
     char aux[200];
 
     t_data *data = (t_data *)calloc(1, sizeof(t_data));
+
     if (data == NULL)
     {
         return NULL;
@@ -135,6 +143,7 @@ t_data *crearDatos(const char *nombre, const char *tipo, const char *valString, 
 
     data->tipo = (char *)malloc(sizeof(char) * (strlen(tipo) + 1));
     strcpy(data->tipo, tipo);
+
     if (strcmp(tipo, TIPO_STRING) == 0 || strcmp(tipo, TIPO_INT) == 0 || strcmp(tipo, TIPO_FLOAT) == 0)
     {
         data->nombre = (char *)malloc(sizeof(char) * (strlen(nombre) + 1));
@@ -142,7 +151,6 @@ t_data *crearDatos(const char *nombre, const char *tipo, const char *valString, 
         data->nombreASM = (char *)malloc(sizeof(char) * (strlen(nombre) + 1));
         strcpy(data->nombreASM, nombre);
 
-        //printf("\n\t\t el nombreASM de %s es %s", data->nombreASM, data->nombre);
         return data;
     }
     else
@@ -169,11 +177,14 @@ t_data *crearDatos(const char *nombre, const char *tipo, const char *valString, 
         }
         if (strcmp(tipo, CONST_INT) == 0)
         {
+            // Si tengo un -1, solamente puede ser el valorNoDeterminado
+            // Para evitar el formateo comun, se utiliza un if
             if (valInt == -1)
             {
                 sprintf(aux, "%s", "valorNoDeterminado");
                 strcat(full, aux);
             }
+            // En caso de tener una variable del tipo "@resultado..", tambien se evita el formateo comun
             else if (strcmp(nombre, obtenerStringVariableResultadoTS()) == 0)
             {
                 sprintf(aux, "%s", obtenerStringVariableResultadoTS());
@@ -184,6 +195,7 @@ t_data *crearDatos(const char *nombre, const char *tipo, const char *valString, 
                 sprintf(aux, "%d", valInt);
                 strcat(full, aux);
             }
+
             data->nombre = (char *)malloc(sizeof(char) * (strlen(full) + 1));
             strcpy(data->nombre, full);
             data->valor.valor_int = valInt;
@@ -200,7 +212,7 @@ t_data *crearDatos(const char *nombre, const char *tipo, const char *valString, 
 void guardarTS()
 {
     FILE *arch;
-    if ((arch = fopen("ts.txt", "wt")) == NULL)
+    if ((arch = fopen(NOMBRE_ARCHIVO_TS, "wt")) == NULL)
     {
         printf("\nNo se pudo crear la tabla de simbolos.\n\n");
         return;
@@ -208,12 +220,14 @@ void guardarTS()
     else if (tablaTS.primero == NULL)
         return;
 
+    // Hago un print de la primera linea del archivo
     fprintf(arch, "%-60s%-20s%-50s%-15s\n", "NOMBRE", "TIPO DATO", "VALOR", "LONGITUD");
 
     t_simbolo *aux;
     t_simbolo *tabla = tablaTS.primero;
     char linea[300];
 
+    // Recorro la tabla de simbolos
     while (tabla)
     {
         aux = tabla;
@@ -225,6 +239,7 @@ void guardarTS()
         }
         else if (strcmp(aux->data.tipo, CONST_INT) == 0)
         {
+            // Utilizo una funcion para obtener la longitud del const int
             sprintf(linea, "%-60s%-20s%-50d%-15d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_int, printLen(aux->data.valor.valor_int));
         }
         else if (strcmp(aux->data.tipo, CONST_STR) == 0)

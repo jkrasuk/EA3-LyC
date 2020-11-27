@@ -10,6 +10,7 @@
 #define IF "IF"
 #define NOMBRE_ARCHIVO_INTERMEDIA_TXT "intermedia.txt"
 #define NOMBRE_ARCHIVO_ASM "Final.asm"
+#define NOMBRE_ARCHIVO_TS "ts.txt"
 #define TIPO_INT "INT"
 #define TIPO_FLOAT "FLOAT"
 #define TIPO_STRING "STRING"

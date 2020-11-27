@@ -21,6 +21,7 @@ void recorrerArbolGraphviz(ast *arbol, FILE *pf);
 int contadorId = 0;
 FILE *intermedia;
 
+// Funcion para la creacion de un nuevo nodo
 ast *newNode(char *operation, ast *leftNode, ast *rightNode)
 {
     ast *node = (ast *)malloc(sizeof(ast));
@@ -32,6 +33,7 @@ ast *newNode(char *operation, ast *leftNode, ast *rightNode)
     return node;
 }
 
+// Funcion para la creacion de una nueva hoja
 ast *newLeaf(char *value)
 {
     ast *node = (ast *)malloc(sizeof(ast));
@@ -45,6 +47,7 @@ ast *newLeaf(char *value)
 
 void print2DUtil(ast *root, int space)
 {
+    int i;
 
     // Base case
     if (root == NULL)
@@ -58,9 +61,10 @@ void print2DUtil(ast *root, int space)
 
     // Print current node after space
     fprintf(intermedia, "\n");
-    int i;
+
     for (i = 10; i < space; i++)
         fprintf(intermedia, " ");
+
     fprintf(intermedia, "%s\n", root->value);
 
     // Process left child
@@ -71,11 +75,13 @@ void print2DUtil(ast *root, int space)
 void print2D(ast *root)
 {
     intermedia = fopen(NOMBRE_ARCHIVO_INTERMEDIA_TXT, "w");
+
     if (intermedia == NULL)
     {
         printf("No se pudo crear el archivo intermedia.txt\n");
         exit(1);
     }
+
     // Pass initial space count as 0
     print2DUtil(root, 0);
     fclose(intermedia);
@@ -97,7 +103,7 @@ void recorrerArbolGraphviz(ast *arbol, FILE *pf)
     {
         return;
     }
-    
+
     if (arbol->left)
     {
         fprintf(pf, " N%d -> N%d; \n", arbol->nodeId, arbol->left->nodeId);
@@ -111,6 +117,9 @@ void recorrerArbolGraphviz(ast *arbol, FILE *pf)
     }
 
     if (strchr(arbol->value, '\"'))
+    {
+        // En caso de que sea una hoja con mensaje de error, debe tener doble redondel
+        // De esta forma, se indica que allí termina el programa
         if (strcmp(arbol->value, ELEMENTO_NO_ENCONTRADO) == 0 || strcmp(arbol->value, EL_VALOR_DEBE_SER_MAYOR_O_IGUAL_A_1) == 0 || strcmp(arbol->value, LISTA_VACIA) == 0)
         {
             fprintf(pf, " N%d [peripheries=2; label = %s]\n", arbol->nodeId, arbol->value);
@@ -119,6 +128,7 @@ void recorrerArbolGraphviz(ast *arbol, FILE *pf)
         {
             fprintf(pf, " N%d [label = %s]\n", arbol->nodeId, arbol->value);
         }
+    }
     else
     {
         fprintf(pf, " N%d [label = \"%s\"]\n", arbol->nodeId, arbol->value);
