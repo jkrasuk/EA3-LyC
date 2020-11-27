@@ -15,10 +15,15 @@ _1                                                dd             1.0
 _valorNoDeterminado                               dd             -1.0           
 _Ingrese_un_valor_pivot_mayor_o_igual_a_1____4    db             "Ingrese un valor pivot mayor o igual a 1: ", '$', 42 dup (?)
 pivot                                             dd             ?              
-_3                                                dd             3.0            
+_10                                               dd             10.0           
 _0                                                dd             0.0            
 __@resultado0                                     dd             0.0            
+_20                                               dd             20.0           
+_30                                               dd             30.0           
 _2                                                dd             2.0            
+_40                                               dd             40.0           
+_3                                                dd             3.0            
+_5                                                dd             5.0            
 _4                                                dd             4.0            
 resul                                             dd             ?              
 _Elemento_encontrado_en_posicion____5             db             "Elemento encontrado en posicion: ", '$', 33 dup (?)
@@ -63,7 +68,7 @@ fstp __@resultado0
 ;Codigo if
 fld pivot
 fstp @ifI
-fld _3
+fld _10
 fstp @ifD
 fld @ifI
 fld @ifD
@@ -79,7 +84,7 @@ branch1:
 ;Codigo if
 fld pivot
 fstp @ifI
-fld _2
+fld _20
 fstp @ifD
 fld @ifI
 fld @ifD
@@ -95,7 +100,7 @@ branch2:
 ;Codigo if
 fld pivot
 fstp @ifI
-fld _1
+fld _30
 fstp @ifD
 fld @ifI
 fld @ifD
@@ -111,7 +116,7 @@ branch3:
 ;Codigo if
 fld pivot
 fstp @ifI
-fld _4
+fld _40
 fstp @ifD
 fld @ifI
 fld @ifD
@@ -123,6 +128,38 @@ jne branch4
 fld _3
 fstp __@resultado0
 branch4:
+
+;Codigo if
+fld pivot
+fstp @ifI
+fld _5
+fstp @ifD
+fld @ifI
+fld @ifD
+fxch
+fcom 
+fstsw AX
+sahf
+jne branch5
+fld _4
+fstp __@resultado0
+branch5:
+
+;Codigo if
+fld pivot
+fstp @ifI
+fld _4
+fstp @ifD
+fld @ifI
+fld @ifD
+fxch
+fcom 
+fstsw AX
+sahf
+jne branch6
+fld _5
+fstp __@resultado0
+branch6:
 fld __@resultado0
 fstp resul
 
@@ -137,12 +174,12 @@ fxch
 fcom 
 fstsw AX
 sahf
-jne branch5
+jne branch7
 displayString _elemento_no_encontrado_1
 NEWLINE
 JMP FOOTER
 NEWLINE
-branch5:
+branch7:
 displayString _Elemento_encontrado_en_posicion____5
 NEWLINE
 fld resul
