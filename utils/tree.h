@@ -71,7 +71,7 @@ void print2DUtil(ast *root, int space)
 // Wrapper over print2DUtil()
 void print2D(ast *root)
 {
-    intermedia = fopen("intermedia.txt", "w");
+    intermedia = fopen(NOMBRE_ARCHIVO_INTERMEDIA_TXT, "w");
     if (intermedia == NULL)
     {
         printf("No se pudo crear el archivo intermedia.txt\n");

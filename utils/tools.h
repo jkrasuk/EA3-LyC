@@ -7,3 +7,7 @@
 #define WRITE_NODE "WRITE"
 #define READ_NODE "READ"
 #define IF "IF"
+#define NOMBRE_ARCHIVO_INTERMEDIA_TXT "intermedia.txt"
+#define TIPO_INT "INT"
+#define TIPO_FLOAT "FLOAT"
+#define TIPO_STRING "STRING"

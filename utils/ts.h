@@ -52,14 +52,14 @@ void inicializarTS()
     insertarTS("_elemento_no_encontrado", CONST_STR, ELEMENTO_NO_ENCONTRADO, 0, 0);
     insertarTS("_valor_menor_a_1", CONST_STR, "\"El valor debe ser >= 1\"", 0, 0);
     insertarTS("_lista_vacia", CONST_STR, LISTA_VACIA, 0, 0);
-    insertarTS("_0", CONST_INT, "", 0, 0);
+    // Utilizado para comparar si el valor es mayor o igual a 1
     insertarTS("_1", CONST_INT, "", 1, 0);
     insertarTS(VALOR_NO_DETERMINADO, CONST_INT, "", -1, 0);
 }
 void crearTablaTS()
 {
     t_data *data = (t_data *)malloc(sizeof(t_data));
-    data = crearDatos("@resultado", "INT", "", 0, 0);
+    data = crearDatos("@resultado", TIPO_INT, "", 0, 0);
 
     if (data == NULL)
     {
@@ -80,6 +80,7 @@ void crearTablaTS()
 
 int insertarTS(const char *nombre, const char *tipo, const char *valString, int valInt, double valDouble)
 {
+    printf("nombre: %s - valString %s - valInt %d", nombre, valString, valInt);
     t_simbolo *tabla = tablaTS.primero;
     char nombreCTE[300] = "_";
     strcat(nombreCTE, nombre);
@@ -155,7 +156,7 @@ t_data *crearDatos(const char *nombre, const char *tipo, const char *valString, 
 
     data->tipo = (char *)malloc(sizeof(char) * (strlen(tipo) + 1));
     strcpy(data->tipo, tipo);
-    if (strcmp(tipo, "STRING") == 0 || strcmp(tipo, "INT") == 0 || strcmp(tipo, "FLOAT") == 0)
+    if (strcmp(tipo, TIPO_STRING) == 0 || strcmp(tipo, TIPO_INT) == 0 || strcmp(tipo, TIPO_FLOAT) == 0)
     {
         data->nombre = (char *)malloc(sizeof(char) * (strlen(nombre) + 1));
         strcpy(data->nombre, nombre);
@@ -234,7 +235,7 @@ void guardarTS()
         aux = tabla;
         tabla = tabla->next;
 
-        if (strcmp(aux->data.tipo, "INT") == 0 || strcmp(aux->data.tipo, "FLOAT") == 0 || strcmp(aux->data.tipo, "STRING") == 0)
+        if (strcmp(aux->data.tipo, TIPO_INT) == 0 || strcmp(aux->data.tipo, TIPO_FLOAT) == 0 || strcmp(aux->data.tipo, TIPO_STRING) == 0)
         {
             sprintf(linea, "%-60s%-20s%-50s%-15s\n", aux->data.nombre, aux->data.tipo, "-", "-");
         }

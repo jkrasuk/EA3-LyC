@@ -96,7 +96,7 @@ sent: read {_pSent = _read; printf("\n Regla 3 - prog: read \n");}
 read: READ ID {
                 sprintf(bufferTS,"%s", $2);
                 puntBufferTs = strtok(bufferTS, " ;\n"); 
-                if(insertarTS(puntBufferTs, "INT", "", 0, 0) != 0)
+                if(insertarTS(puntBufferTs, TIPO_INT, "", 0, 0) != 0)
                 {
                   fprintf(stdout, "%s%s%s", "Error: la variable '", puntBufferTs, "' ya fue declarada");
                 }
@@ -110,7 +110,7 @@ read: READ ID {
 asig: ID ASIG posicion {
                           sprintf(bufferTS,"%s", $1);
                           puntBufferTs = strtok(bufferTS, " ;\n"); 
-                          if(insertarTS(puntBufferTs, "INT", "", 0, 0) != 0)
+                          if(insertarTS(puntBufferTs, TIPO_INT, "", 0, 0) != 0)
                           {
                             fprintf(stdout, "%s%s%s", "Error: la variable '", puntBufferTs, "' ya fue declarada");
                           }
@@ -145,9 +145,7 @@ lista: CTE_INT {
                 // Inserto en la lista el lugar de ocurrencia
                 sprintf(bufferPosicion,"%d", insertarLista(numero, indicePosicion));
                 puntBufferPosicion = strtok(bufferPosicion,";\n");
-
-                // Agrego el elemento a la TS (para luego poder utilizarlo)
-                insertarTS(puntBufferTs, CONST_INT, "", insertarLista(numero, indicePosicion), 0);
+                insertarTS(puntBufferPosicion, CONST_INT, "", insertarLista(numero, indicePosicion), 0);
 
                 _condPosicion = newNode( IF,
                  newNode("=", newLeaf(puntBufferNombrePivot) , newLeaf( puntBufferTs )) ,
@@ -169,7 +167,6 @@ lista: CTE_INT {
                         // Formateo el CTE_INT y lo inserto en la tabla de simbolos
                         int numero = atoi(bufferTS);
                         insertarTS(puntBufferTs, CONST_INT, "", numero, 0);
-
                                                
                         // Agrego el elemento a la TS (para luego poder utilizarlo)
                         sprintf(bufferPosicion,"%d", insertarLista(numero, indicePosicion));

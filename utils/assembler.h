@@ -231,15 +231,15 @@ void crearSeccionData(FILE *archAssembler, t_tabla *tablaTS)
     {
         aux = tablaSimbolos;
         tablaSimbolos = tablaSimbolos->next;
-        if (strcmp(aux->data.tipo, "INT") == 0)
+        if (strcmp(aux->data.tipo, TIPO_INT) == 0)
         {
             fprintf(archAssembler, "%-50s%-15s%-15s\n", aux->data.nombre, "dd", "?");
         }
-        else if (strcmp(aux->data.tipo, "FLOAT") == 0)
+        else if (strcmp(aux->data.tipo, TIPO_FLOAT) == 0)
         {
             fprintf(archAssembler, "%-50s%-15s%-15s\n", aux->data.nombreASM, "dd", "?");
         }
-        else if (strcmp(aux->data.tipo, "STRING") == 0)
+        else if (strcmp(aux->data.tipo, TIPO_STRING) == 0)
         {
             fprintf(archAssembler, "%-50s%-15s%-15s\n", aux->data.nombreASM, "db", "?");
         }
@@ -247,12 +247,6 @@ void crearSeccionData(FILE *archAssembler, t_tabla *tablaTS)
         {
             char valor[50];
             sprintf(valor, "%d.0", aux->data.valor.valor_int);
-            fprintf(archAssembler, "%-50s%-15s%-15s\n", aux->data.nombreASM, "dd", valor);
-        }
-        else if (strcmp(aux->data.tipo, "CONST_REAL") == 0)
-        {
-            char valor[50];
-            sprintf(valor, "%g", aux->data.valor.valor_double);
             fprintf(archAssembler, "%-50s%-15s%-15s\n", aux->data.nombreASM, "dd", valor);
         }
         else if (strcmp(aux->data.tipo, CONST_STR) == 0)

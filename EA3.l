@@ -12,7 +12,6 @@ void validarID();
 %}
 %option noyywrap noinput nounput yylineno
 
-
 DIGITO									[0-9]
 LETRA									[a-zA-ZáéíóúÁÉÍÓÚ]
 DELIM									[ \t\n\r]
@@ -25,7 +24,6 @@ ID										{LETRA}({LETRA}|{DIGITO}|_)*
 WRITE									[Ww][Rr][Ii][Tt][Ee]
 READ									[Rr][Ee][Aa][Dd]
 POSICION								[Pp][Oo][Ss][Ii][Cc][Ii][Oo][Nn]
-
 
 %%
 

@@ -12,12 +12,12 @@ include number.asm
 _elemento_no_encontrado_1                         db             "Elemento no encontrado", '$', 22 dup (?)
 _valor_menor_a_1_2                                db             "El valor debe ser >= 1", '$', 22 dup (?)
 _lista_vacia_3                                    db             "Lista vacia", '$', 11 dup (?)
-_0                                                dd             0.0            
 _1                                                dd             1.0            
 _valorNoDeterminado                               dd             -1.0           
 _Ingrese_un_valor_pivot_mayor_o_igual_a_1____4    db             "Ingrese un valor pivot mayor o igual a 1: ", '$', 42 dup (?)
 pivot                                             dd             ?              
 _3                                                dd             3.0            
+_0                                                dd             0.0            
 _2                                                dd             2.0            
 _4                                                dd             4.0            
 resul                                             dd             ?              
