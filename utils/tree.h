@@ -49,17 +49,13 @@ void generarArbolTXTUtil(ast *root, int space)
 {
     int i;
 
-    // Base case
     if (root == NULL)
         return;
 
-    // Increase distance between levels
     space += 10;
 
-    // Process right child first
     generarArbolTXTUtil(root->right, space);
 
-    // Print current node after space
     fprintf(intermedia, "\n");
 
     for (i = 10; i < space; i++)
@@ -67,11 +63,9 @@ void generarArbolTXTUtil(ast *root, int space)
 
     fprintf(intermedia, "%s\n", root->value);
 
-    // Process left child
     generarArbolTXTUtil(root->left, space);
 }
 
-// Wrapper over generarArbolTXTUtil()
 void generarArbolTXT(ast *root)
 {
     intermedia = fopen(NOMBRE_ARCHIVO_INTERMEDIA_TXT, "w");
@@ -82,7 +76,6 @@ void generarArbolTXT(ast *root)
         exit(1);
     }
 
-    // Pass initial space count as 0
     generarArbolTXTUtil(root, 0);
     fclose(intermedia);
 }
