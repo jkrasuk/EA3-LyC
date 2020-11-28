@@ -17,7 +17,8 @@ extern FILE* yyin;
 extern int yylineno;
 extern int yyleng;
 extern char *yytext;
-
+void crearNodosValidacion(int, int);
+void validarVariablePivot(char *buffer);
 char bufferTS[800], bufferNombrePivot[800], bufferPosicion[800];
 char *puntBufferTs, *puntBufferNombrePivot, *puntBufferPosicion;
 int indicePosicion = 0, i = 0, funcionPosicion = 0, funcionRead = 0, tengoLista = 0;
@@ -60,31 +61,12 @@ S:
 
 PROG: PROG SENT {
     _pProg = newNode(PUNTO_Y_COMA, _pProg, _pSent); 
-    
-    if(funcionPosicion)
-    {
-        _nodoComprobacionValidacion = newNode("=", newLeaf(puntBufferTs), newLeaf(VALOR_NO_DETERMINADO));
-        if(tengoLista)
-        {
-            _nodoMensajeValidacion = newNode(WRITE_NODE, NULL, newLeaf(ELEMENTO_NO_ENCONTRADO));
-        }
-        else
-        {
-            _nodoMensajeValidacion = newNode(WRITE_NODE, NULL, newLeaf(LISTA_VACIA));
-        }
-
-        _pProg = newNode(PUNTO_Y_COMA, _pProg, newNode(IF, _nodoComprobacionValidacion, _nodoMensajeValidacion));
-    }
-    else if(funcionRead)
-    {
-        _nodoComprobacionValidacion = newNode("<", newLeaf(puntBufferTs), newLeaf("_1"));
-        _nodoMensajeValidacion = newNode(WRITE_NODE, NULL, newLeaf(EL_VALOR_DEBE_SER_MAYOR_O_IGUAL_A_1));
-        _pProg = newNode(PUNTO_Y_COMA, _pProg, newNode(IF, _nodoComprobacionValidacion, _nodoMensajeValidacion));
-    }
-
+    crearNodosValidacion(funcionPosicion, funcionRead);
     printf("\n Regla 2: PROG -> PROG SENT \n");
     }
-  | SENT {_pProg = _pSent; printf("\n Regla 1: PROG -> SENT \n");}
+  | SENT { _pProg = _pSent; 
+          crearNodosValidacion(funcionPosicion, funcionRead);
+          printf("\n Regla 1: PROG -> SENT \n");}
   ;
 
 SENT: READ {_pSent = _read; printf("\n Regla 3: SENT -> READ \n");}
@@ -121,7 +103,11 @@ ASIG: id asigna POSICION {
   ;
 
 POSICION: 
-  posicion para id pyc ca {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} LISTA cc parc {
+  posicion para id pyc ca {
+      sprintf(bufferNombrePivot,"%s", $3);
+      puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");
+      validarVariablePivot(puntBufferNombrePivot);
+    } LISTA cc parc {
     tengoLista = 1; aumentarContadorVariableResultado(); limpiarLista(); printf("\n Regla 6: POSICION -> posicion para id pyc ca LISTA cc parc \n");}
   | posicion para id pyc ca {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} cc parc {
     tengoLista = 0;
@@ -227,4 +213,41 @@ void yyerror(const char *str)
     fprintf(stderr, "Error: %s en la linea %d\n", str, yylineno);
     system("Pause");
     exit(1);
+}
+
+void crearNodosValidacion(int funcionPosicion, int funcionRead)
+{
+    if (funcionPosicion)
+    {
+        _nodoComprobacionValidacion = newNode("=", newLeaf(puntBufferTs), newLeaf(VALOR_NO_DETERMINADO));
+        if (tengoLista)
+        {
+            _nodoMensajeValidacion = newNode(WRITE_NODE, NULL, newLeaf(ELEMENTO_NO_ENCONTRADO));
+        }
+        else
+        {
+            _nodoMensajeValidacion = newNode(WRITE_NODE, NULL, newLeaf(LISTA_VACIA));
+        }
+
+        _pProg = newNode(PUNTO_Y_COMA, _pProg, newNode(IF, _nodoComprobacionValidacion, _nodoMensajeValidacion));
+    }
+    else if (funcionRead)
+    {
+        _nodoComprobacionValidacion = newNode("<", newLeaf(puntBufferTs), newLeaf("_1"));
+
+        _nodoMensajeValidacion = newNode(WRITE_NODE, NULL, newLeaf(EL_VALOR_DEBE_SER_MAYOR_O_IGUAL_A_1));
+
+        _pProg = newNode(PUNTO_Y_COMA, _pProg, newNode(IF, _nodoComprobacionValidacion, _nodoMensajeValidacion));
+    }
+}
+
+void validarVariablePivot(char *buffer)
+{
+    // En caso de que no exista el pivot, debo detener la ejecución
+    if (insertarTS(buffer, TIPO_INT, "", 0, 0) == 0)
+    {
+        fprintf(stdout, "%s%s%s", "\nError: la variable '", buffer, "' no fue declarada\n");
+        system("Pause");
+        exit(1);
+    }
 }

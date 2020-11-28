@@ -4,8 +4,8 @@ _valor_menor_a_1_2                                          CONST_STR           
 _lista_vacia_3                                              CONST_STR           "Lista vacia"                                     11             
 _1                                                          CONST_INT           1                                                 1              
 _valorNoDeterminado                                         CONST_INT           -1                                                2              
-_Ingrese_un_valor_pivot_mayor_o_igual_a_1____4              CONST_STR           "Ingrese un valor pivot mayor o igual a 1: "      42             
 pivot                                                       INT                 -                                                 -              
+_Ingrese_un_valor_pivot_mayor_o_igual_a_1____4              CONST_STR           "Ingrese un valor pivot mayor o igual a 1: "      42             
 _10                                                         CONST_INT           10                                                2              
 _0                                                          CONST_INT           0                                                 1              
 __@resultado0                                               CONST_INT           0                                                 1              

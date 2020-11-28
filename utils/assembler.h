@@ -12,7 +12,7 @@ void recorrerArbol(ast *, FILE *);
 void generarAssemblerAsignacion(ast *root, FILE *archAssembler);
 void generarAssemblerAsignacionSimple(ast *root, FILE *archAssembler);
 
-int branchN = 0, branchElementoNoEncontrado = 0, branchPivotMenorAUno = 0;
+int branchN = 0, branchElementoNoEncontrado = 0, branchPivotMenorAUno = 0, resulAsignadoConValorNoDeterminado = 0;
 char tempBufferResultado[800];
 
 void generarAssembler(ast *_pProg, t_tabla *tablaTS)
@@ -117,7 +117,9 @@ void recorrerArbol(ast *root, FILE *archAssembler)
     {
         fueAsignacion = 1;
 
-        if (strcmp(root->right->value, VALOR_NO_DETERMINADO) == 0)
+        // Solamente entro aca si ya entre al menos una vez al codigo de posicion
+        // De esta forma, puedo asignar correctamente la variable resul
+        if (strcmp(root->right->value, VALOR_NO_DETERMINADO) == 0 && resulAsignadoConValorNoDeterminado)
         {
             // Cargo el lado izquierdo en la variable @ifI
             t_simbolo *lexemaI = getLexema(root->left->value);
@@ -163,6 +165,10 @@ void recorrerArbol(ast *root, FILE *archAssembler)
         }
         else
         {
+            if (strcmp(root->right->value, VALOR_NO_DETERMINADO) == 0)
+            {
+                resulAsignadoConValorNoDeterminado = 1;
+            }
             generarAssemblerAsignacionSimple(root, archAssembler);
         }
     }
@@ -229,6 +235,7 @@ void generarAssemblerPosicion(ast *root, FILE *archAssembler)
     {
         if (strcmp(root->right->value, VALOR_NO_DETERMINADO) == 0)
         {
+            resulAsignadoConValorNoDeterminado = 1;
             generarAssemblerAsignacionSimple(root, archAssembler);
         }
     }
