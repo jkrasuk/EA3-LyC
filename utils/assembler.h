@@ -92,6 +92,13 @@ void recorrerArbol(ast *root, FILE *archAssembler)
                 fprintf(archAssembler, "branch%d:\n", branchN); //aca cae si dio false
                 branchN++;
             }
+            else if (strcmp(lexema->data.valor.valor_str, LISTA_VACIA) == 0)
+            {
+                // Realizo un salto incondicional al final del programa
+                fprintf(archAssembler, "JMP FOOTER\nNEWLINE\n");
+                fprintf(archAssembler, "branch%d:\n", branchN); //aca cae si dio false
+                branchN++;
+            }
         }
         else
         {

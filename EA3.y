@@ -18,7 +18,9 @@ extern int yylineno;
 extern int yyleng;
 extern char *yytext;
 void crearNodosValidacion(int, int);
-void validarVariablePivot(char *buffer);
+void validarVariablePivot(char *);
+void insertarEnTS(char *bufferTS, char *puntBufferTs, char* cad, char* tipo);
+
 char bufferTS[800], bufferNombrePivot[800], bufferPosicion[800];
 char *puntBufferTs, *puntBufferNombrePivot, *puntBufferPosicion;
 int indicePosicion = 0, i = 0, funcionPosicion = 0, funcionRead = 0, tengoLista = 0;
@@ -75,12 +77,7 @@ SENT: READ {_pSent = _read; printf("\n Regla 3: SENT -> READ \n");}
   ;
 
 READ: read id {
-                sprintf(bufferTS,"%s", $2);
-                puntBufferTs = strtok(bufferTS, " ;\n"); 
-                if(insertarTS(puntBufferTs, TIPO_INT, "", 0, 0) != 0)
-                {
-                  fprintf(stdout, "%s%s%s", "Error: la variable '", puntBufferTs, "' ya fue declarada");
-                }
+                insertarEnTS(bufferTS, puntBufferTs, $2, TIPO_INT);
                 _read = newNode(READ_NODE, NULL ,newLeaf(puntBufferTs));
                 printf("\n Regla 4: READ -> read id \n");
                 funcionPosicion = 0;
@@ -89,12 +86,7 @@ READ: read id {
   ;
 
 ASIG: id asigna POSICION {
-                          sprintf(bufferTS,"%s", $1);
-                          puntBufferTs = strtok(bufferTS, " ;\n"); 
-                          if(insertarTS(puntBufferTs, TIPO_INT, "", 0, 0) != 0)
-                          {
-                            fprintf(stdout, "%s%s%s", "Error: la variable '", puntBufferTs, "' ya fue declarada");
-                          }
+                          insertarEnTS(bufferTS, puntBufferTs, $1, TIPO_INT);
                           _asig = newNode("=", newLeaf(puntBufferTs) , _posicion );                                 
                           printf("\n Regla 5: ASIG -> id asigna POSICION \n");
                           funcionPosicion = 1;
@@ -104,23 +96,29 @@ ASIG: id asigna POSICION {
 
 POSICION: 
   posicion para id pyc ca {
-      sprintf(bufferNombrePivot,"%s", $3);
-      puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");
-      validarVariablePivot(puntBufferNombrePivot);
+      validarVariablePivot($3);
     } LISTA cc parc {
-    tengoLista = 1; aumentarContadorVariableResultado(); limpiarLista(); printf("\n Regla 6: POSICION -> posicion para id pyc ca LISTA cc parc \n");}
-  | posicion para id pyc ca {sprintf(bufferNombrePivot,"%s", $3); puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");} cc parc {
-    tengoLista = 0;
-    _posicion = newLeaf(VALOR_NO_DETERMINADO);
+                      tengoLista = 1;
+                      aumentarContadorVariableResultado();
+                      limpiarLista();
+                      printf("\n Regla 6: POSICION -> posicion para id pyc ca LISTA cc parc \n");
+                      }
+  | posicion para id pyc ca {
+                              validarVariablePivot($3);
+                              } cc parc {
+                                          tengoLista = 0;
 
-    printf("\n Regla 7: POSICION -> posicion para id pyc ca cc parc \n");}
+                                          // Pongo una hoja "valor no determinado", la cual luego sera comprobada
+                                          // para determinar si la lista está vacía
+                                          _posicion = newLeaf(VALOR_NO_DETERMINADO);
+
+                                          printf("\n Regla 7: POSICION -> posicion para id pyc ca cc parc \n");
+                                          }
   ;
 
 LISTA: cte {
                 // Inicializo la posicion en 0
                 indicePosicion = 0;
-                sprintf(bufferPosicion,"%d", indicePosicion);
-                puntBufferPosicion = strtok(bufferPosicion,";\n");
 
                 // Formateo el CTE_INT y lo inserto en la tabla de simbolos
                 sprintf(bufferTS,"%d", $1);
@@ -128,7 +126,7 @@ LISTA: cte {
                 int numero = atoi(bufferTS);
                 insertarTS(puntBufferTs, CONST_INT, "", numero, 0);
 
-                // Inserto en la lista el lugar de ocurrencia
+                // Inserto en la lista el lugar de ocurrencia, y dicho numero lo inserto en la TS
                 sprintf(bufferPosicion,"%d", insertarLista(numero, indicePosicion));
                 puntBufferPosicion = strtok(bufferPosicion,";\n");
                 insertarTS(puntBufferPosicion, CONST_INT, "", insertarLista(numero, indicePosicion), 0);
@@ -136,6 +134,8 @@ LISTA: cte {
                 // Voy a crear la variable auxiliar @resultado..
                 insertarTS(obtenerStringVariableResultado(), CONST_INT, "", 0, 0);
                 
+                // Nodo en el cual se verifica si el pivot coincide con el valor cte
+                // En caso verdadero, entonces se deberá asignar la posicion a la variable resultado
                 _condPosicion = newNode( IF,
                  newNode("=", newLeaf(puntBufferNombrePivot) , newLeaf( puntBufferTs )) ,
                  newNode("=", newLeaf(obtenerStringVariableResultadoTS()) , newLeaf( puntBufferPosicion ))
@@ -150,21 +150,23 @@ LISTA: cte {
                         // Aumento la posicion
                         indicePosicion++;
 
+                        // Formateo el CTE_INT y lo inserto en la tabla de simbolos
                         sprintf(bufferTS,"%d", $3);
                         puntBufferTs = strtok(bufferTS,";\n");
-
-                        // Formateo el CTE_INT y lo inserto en la tabla de simbolos
                         int numero = atoi(bufferTS);
                         insertarTS(puntBufferTs, CONST_INT, "", numero, 0);
                                                
-                        // Agrego el elemento a la TS (para luego poder utilizarlo)
+                        // Agrego el elemento de la posicion la TS (para luego poder utilizarlo)
                         sprintf(bufferPosicion,"%d", insertarLista(numero, indicePosicion));
                         puntBufferPosicion = strtok(bufferPosicion,";\n");
                         insertarTS(puntBufferPosicion, CONST_INT, "", insertarLista(numero, indicePosicion), 0);
                         
+                        // Nodo en el cual se verifica si el pivot coincide con el valor cte
+                        // En caso verdadero, entonces se deberá asignar la posicion a la variable resultado
                         _condPosicion = newNode( IF, newNode("=", newLeaf(puntBufferNombrePivot) , newLeaf( puntBufferTs ) ) , newNode("=", newLeaf(obtenerStringVariableResultadoTS()) , newLeaf( puntBufferPosicion ) ));
-                        _posicion = newNode(PUNTO_Y_COMA, _posicion , _condPosicion );
 
+                        // Creo un nuevo nodo
+                        _posicion = newNode(PUNTO_Y_COMA, _posicion , _condPosicion );
 
                         printf("\n Regla 9: LISTA -> LISTA coma cte \n");
                         }
@@ -241,13 +243,30 @@ void crearNodosValidacion(int funcionPosicion, int funcionRead)
     }
 }
 
-void validarVariablePivot(char *buffer)
+void validarVariablePivot(char *cad)
 {
+    sprintf(bufferNombrePivot, "%s", cad);
+    puntBufferNombrePivot = strtok(bufferNombrePivot, " ;\n");
+
     // En caso de que no exista el pivot, debo detener la ejecución
-    if (insertarTS(buffer, TIPO_INT, "", 0, 0) == 0)
+    if (insertarTS(puntBufferNombrePivot, TIPO_INT, "", 0, 0) == 0)
     {
-        fprintf(stdout, "%s%s%s", "\nError: la variable '", buffer, "' no fue declarada\n");
+        fprintf(stdout, "%s%s%s", "\nError: la variable '", puntBufferNombrePivot, "' no fue declarada\n");
         system("Pause");
         exit(1);
+    }
+}
+
+void insertarEnTS(char *buffer, char *puntBuffer, char *cad, char *tipo)
+{
+    sprintf(bufferTS, "%s", cad);
+    puntBuffer = strtok(bufferTS, " ;\n");
+
+    if (strcmp(tipo, TIPO_INT) == 0)
+    {
+        if (insertarTS(puntBuffer, tipo, "", 0, 0) != 0)
+        {
+            fprintf(stdout, "%s%s%s", "Error: la variable '", puntBuffer, "' ya fue declarada");
+        }
     }
 }
