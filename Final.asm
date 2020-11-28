@@ -13,8 +13,8 @@ _valor_menor_a_1_2                                db             "El valor debe 
 _lista_vacia_3                                    db             "Lista vacia", '$', 11 dup (?)
 _1                                                dd             1.0            
 _valorNoDeterminado                               dd             -1.0           
-pivot                                             dd             ?              
 _Ingrese_un_valor_pivot_mayor_o_igual_a_1____4    db             "Ingrese un valor pivot mayor o igual a 1: ", '$', 42 dup (?)
+pivot                                             dd             ?              
 _10                                               dd             10.0           
 _0                                                dd             0.0            
 __@resultado0                                     dd             0.0            
@@ -38,7 +38,9 @@ MOV AX,@DATA
 MOV DS,AX                     
 MOV ES,AX                     
 
-GetFloat pivot,1
+displayString _Ingrese_un_valor_pivot_mayor_o_igual_a_1____4
+NEWLINE
+GetFloat pivot
 NEWLINE
 FLD pivot
 FSTP @ifI
@@ -56,8 +58,6 @@ NEWLINE
 JMP FOOTER
 NEWLINE
 branch0:
-displayString _Ingrese_un_valor_pivot_mayor_o_igual_a_1____4
-NEWLINE
 FLD _valorNoDeterminado
 FSTP __@resultado0
 FLD pivot

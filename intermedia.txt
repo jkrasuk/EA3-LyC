@@ -133,26 +133,26 @@
 
                               ;
 
-                                                            "Ingrese un valor pivot mayor o igual a 1: "
+                                                                      "El valor debe ser >= 1"
 
-                                                  WRITE
+                                                            WRITE
+
+                                                  IF
+
+                                                                      _1
+
+                                                            <
+
+                                                                      pivot
 
                                         ;
-
-                                                                                "El valor debe ser >= 1"
-
-                                                                      WRITE
-
-                                                            IF
-
-                                                                                _1
-
-                                                                      <
-
-                                                                                pivot
-
-                                                  ;
 
                                                                       pivot
 
                                                             READ
+
+                                                  ;
+
+                                                                      "Ingrese un valor pivot mayor o igual a 1: "
+
+                                                            WRITE
