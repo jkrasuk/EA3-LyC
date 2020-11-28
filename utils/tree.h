@@ -13,8 +13,8 @@ typedef struct treeNode
 
 ast *newNode();
 ast *newLeaf();
-void print2DUtil(ast *root, int space);
-void print2D(ast *root);
+void generarArbolTXTUtil(ast *root, int space);
+void generarArbolTXT(ast *root);
 void generarGraphviz(ast *arbol);
 void recorrerArbolGraphviz(ast *arbol, FILE *pf);
 
@@ -45,7 +45,7 @@ ast *newLeaf(char *value)
     return node;
 }
 
-void print2DUtil(ast *root, int space)
+void generarArbolTXTUtil(ast *root, int space)
 {
     int i;
 
@@ -57,7 +57,7 @@ void print2DUtil(ast *root, int space)
     space += 10;
 
     // Process right child first
-    print2DUtil(root->right, space);
+    generarArbolTXTUtil(root->right, space);
 
     // Print current node after space
     fprintf(intermedia, "\n");
@@ -68,11 +68,11 @@ void print2DUtil(ast *root, int space)
     fprintf(intermedia, "%s\n", root->value);
 
     // Process left child
-    print2DUtil(root->left, space);
+    generarArbolTXTUtil(root->left, space);
 }
 
-// Wrapper over print2DUtil()
-void print2D(ast *root)
+// Wrapper over generarArbolTXTUtil()
+void generarArbolTXT(ast *root)
 {
     intermedia = fopen(NOMBRE_ARCHIVO_INTERMEDIA_TXT, "w");
 
@@ -83,7 +83,7 @@ void print2D(ast *root)
     }
 
     // Pass initial space count as 0
-    print2DUtil(root, 0);
+    generarArbolTXTUtil(root, 0);
     fclose(intermedia);
 }
 

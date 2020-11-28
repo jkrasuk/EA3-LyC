@@ -17,13 +17,13 @@ extern FILE* yyin;
 extern int yylineno;
 extern int yyleng;
 extern char *yytext;
-void crearNodosValidacion(int, int);
+void crearNodosValidacion(int, int, int);
 void validarVariablePivot(char *);
 void insertarEnTS(char *bufferTS, char *puntBufferTs, char* cad, char* tipo);
 
 char bufferTS[800], bufferNombrePivot[800], bufferPosicion[800];
 char *puntBufferTs, *puntBufferNombrePivot, *puntBufferPosicion;
-int indicePosicion = 0, i = 0, funcionPosicion = 0, funcionRead = 0, tengoLista = 0;
+int indicePosicion = 0, i = 0, funcionPosicion = 0, funcionRead = 0, existeLista = 0;
 ast *_write, *_read, *_asig, *_posicion, *_condPosicion, *_nodoComprobacionValidacion, *_nodoMensajeValidacion, *_pProg, *_pSent;
 %}
 %token id cte cte_s
@@ -55,7 +55,7 @@ S:
         printf("\n Regla 0: S -> PROG \n");
         generarAssembler(_pProg, obtenerTablaTS()); 
         guardarTS();
-        print2D(_pProg); 
+        generarArbolTXT(_pProg); 
         generarGraphviz(_pProg);
         printf("\n COMPILACION EXITOSA \n");
   }
@@ -63,11 +63,11 @@ S:
 
 PROG: PROG SENT {
     _pProg = newNode(PUNTO_Y_COMA, _pProg, _pSent); 
-    crearNodosValidacion(funcionPosicion, funcionRead);
+    crearNodosValidacion(funcionPosicion, funcionRead, existeLista);
     printf("\n Regla 2: PROG -> PROG SENT \n");
     }
   | SENT { _pProg = _pSent; 
-          crearNodosValidacion(funcionPosicion, funcionRead);
+          crearNodosValidacion(funcionPosicion, funcionRead, existeLista);
           printf("\n Regla 1: PROG -> SENT \n");}
   ;
 
@@ -98,7 +98,7 @@ POSICION:
   posicion para id pyc ca {
       validarVariablePivot($3);
     } LISTA cc parc {
-                      tengoLista = 1;
+                      existeLista = 1;
                       aumentarContadorVariableResultado();
                       limpiarLista();
                       printf("\n Regla 6: POSICION -> posicion para id pyc ca LISTA cc parc \n");
@@ -106,7 +106,7 @@ POSICION:
   | posicion para id pyc ca {
                               validarVariablePivot($3);
                               } cc parc {
-                                          tengoLista = 0;
+                                          existeLista = 0;
 
                                           // Pongo una hoja "valor no determinado", la cual luego sera comprobada
                                           // para determinar si la lista está vacía
@@ -217,12 +217,12 @@ void yyerror(const char *str)
     exit(1);
 }
 
-void crearNodosValidacion(int funcionPosicion, int funcionRead)
+void crearNodosValidacion(int funcionPosicion, int funcionRead, int existeLista)
 {
     if (funcionPosicion)
     {
         _nodoComprobacionValidacion = newNode("=", newLeaf(puntBufferTs), newLeaf(VALOR_NO_DETERMINADO));
-        if (tengoLista)
+        if (existeLista)
         {
             _nodoMensajeValidacion = newNode(WRITE_NODE, NULL, newLeaf(ELEMENTO_NO_ENCONTRADO));
         }
