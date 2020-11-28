@@ -40,13 +40,13 @@ void aumentarContadorVariableResultado();
 char *obtenerStringVariableResultadoTS();
 int lenHelper(unsigned x);
 int printLen(int x);
-t_tabla *obtenerTablaTS();
+t_tabla *obtenerTS();
 t_tabla tablaTS;
 
 int contadorString = 0, variablesResultado = 0;
 char buffer[800];
 
-t_tabla *obtenerTablaTS()
+t_tabla *obtenerTS()
 {
     return &(tablaTS);
 }
